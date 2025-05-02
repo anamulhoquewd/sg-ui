@@ -35,17 +35,17 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-primary">
+                <Link href="/products" className="text-muted-foreground hover:text-primary">
                   Shop
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-primary">
+                <Link href="/about" className="text-muted-foreground hover:text-primary">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground hover:text-primary">
+                <Link href="/contact" className="text-muted-foreground hover:text-primary">
                   Contact
                 </Link>
               </li>
@@ -60,7 +60,7 @@ export function Footer() {
             <h3 className="text-lg font-bold mb-4">Customer Service</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/faqs" className="text-muted-foreground hover:text-primary">
+                <Link href="/faq" className="text-muted-foreground hover:text-primary">
                   FAQs
                 </Link>
               </li>
