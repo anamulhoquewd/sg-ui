@@ -1,6 +1,7 @@
 "use client";
 
-import type React from "react";
+import { useState } from "react";
+
 import {
   Card,
   CardContent,
@@ -14,7 +15,6 @@ import { UploadAvatar } from "./upload-avatar";
 import ChangePassword from "./change-password";
 import { Form } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
 import { ProfileDataInputField } from "./password-input-field";
 import { useForm } from "react-hook-form";
 

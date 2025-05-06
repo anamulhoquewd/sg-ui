@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
-import { Camera } from "lucide-react";
+
 import { useRef } from "react";
 
 export function UploadAvatar() {
@@ -28,13 +28,13 @@ export function UploadAvatar() {
           SG
         </AvatarFallback>
       </Avatar>
-      <Button
+      {/* <Button
         type="button"
         variant="outline"
         className="absolute bottom-0 right-0 h-8 w-8 rounded-full cursor-pointer dark:bg-foreground-dark dark:hover:bg-foreground-dark/80"
       >
         <Camera className="h-4 w-4" />
-      </Button>
+      </Button> */}
 
       <Dialog open={false}>
         <DialogContent className="w-[90vw] sm:max-w-[425px] bg-secondary text-secondary-foreground rounded-lg">
