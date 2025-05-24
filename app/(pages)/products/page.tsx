@@ -1,9 +1,9 @@
-import { ProductsSection } from "@/components/products-section";
+import ProductPage from "@/components/product-page";
 
 function Products() {
   return (
-    <section className="container mx-auto py-12 px-4 mt-26">
-      <ProductsSection />
+    <section className="mt-26">
+      <ProductPage />
     </section>
   );
 }

@@ -46,10 +46,10 @@ export default function AboutPage() {
                   <p>
                     Our journey began when our founder, Rahim Ahmed, visited his
                     ancestral village in Rajshahi and witnessed the struggles of
-                    local mango farmers. Despite growing some of the world&apos;s
-                    most delicious mangoes, these farmers were unable to get
-                    fair prices for their produce due to multiple layers of
-                    middlemen.
+                    local mango farmers. Despite growing some of the
+                    world&apos;s most delicious mangoes, these farmers were
+                    unable to get fair prices for their produce due to multiple
+                    layers of middlemen.
                   </p>
                   <p>
                     Starting with just five farmers and delivering to friends
@@ -208,10 +208,10 @@ export default function AboutPage() {
                 <div>
                   <h3 className="text-2xl font-bold mb-4">Premium Mangoes</h3>
                   <p className="mb-4">
-                    Bangladesh is home to some of the world&apos;s most delicious
-                    mango varieties. We carefully select and deliver the finest
-                    mangoes from Rajshahi, Chapainawabganj, and other renowned
-                    mango-growing regions.
+                    Bangladesh is home to some of the world&apos;s most
+                    delicious mango varieties. We carefully select and deliver
+                    the finest mangoes from Rajshahi, Chapainawabganj, and other
+                    renowned mango-growing regions.
                   </p>
                   <p className="mb-4">
                     Our collection includes popular varieties like Himshagor,
@@ -253,47 +253,6 @@ export default function AboutPage() {
                     their natural habitats.
                   </p>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Quality Assurance */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="order-2 lg:order-1">
-                <h2 className="text-3xl font-bold mb-6">Quality Assurance</h2>
-                <div className="space-y-4">
-                  <p>
-                    At Shuddhoghor, quality is our top priority. We implement
-                    strict quality control measures at every stage of our supply
-                    chain.
-                  </p>
-                  <p>
-                    Our team of experts personally visits farms to select the
-                    best produce, ensuring that only premium quality mangoes and
-                    honey make it to your doorstep.
-                  </p>
-                  <p>
-                    We regularly test our products for purity and safety, and
-                    our cold chain logistics ensure that the fruits remain fresh
-                    from farm to table.
-                  </p>
-                  <p>
-                    We stand behind our products with a 100% satisfaction
-                    guarantee. If you&apos;re not completely satisfied with your
-                    purchase, we&apos;ll replace it or provide a refund.
-                  </p>
-                </div>
-              </div>
-              <div className="relative h-[400px] rounded-lg overflow-hidden order-1 lg:order-2">
-                <Image
-                  src="/placeholder.svg?height=800&width=800"
-                  alt="Quality inspection"
-                  fill
-                  className="object-cover"
-                />
               </div>
             </div>
           </div>

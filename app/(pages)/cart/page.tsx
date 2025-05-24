@@ -11,7 +11,6 @@ import {
 import { Plus, Minus, Trash2, ArrowLeft, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Footer } from "@/components/footer";
 import OrderSummary from "@/components/order-summary";
 
 // Sample product data
@@ -220,7 +219,6 @@ export default function CartPage() {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 }

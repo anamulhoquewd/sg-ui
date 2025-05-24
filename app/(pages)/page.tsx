@@ -3,6 +3,7 @@
 import { HeroSection } from "@/components/hero-section";
 import { SearchBar } from "@/components/search-bar";
 import { ProductsSection } from "@/components/products-section";
+import { CategoriesSection } from "@/components/categories-section";
 import { CustomerHelpSection } from "@/components/customer-help-section";
 
 export default function Home() {
@@ -12,7 +13,7 @@ export default function Home() {
         <HeroSection />
         <SearchBar />
         <section className="container mx-auto py-12 px-4">
-          <ProductsSection />
+          <CategoriesSection />
         </section>
         <CustomerHelpSection />
       </main>

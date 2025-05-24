@@ -1,56 +1,95 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { Phone, ShoppingCart, Menu } from "lucide-react"
-import { ModeToggle } from "./mode-toggle"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Phone, ShoppingCart, Menu, ChevronsUpDown } from "lucide-react";
+import { ModeToggle } from "./mode-toggle";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuList,
   NavigationMenuItem,
   NavigationMenuLink,
-} from "@/components/ui/navigation-menu"
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+} from "@/components/ui/navigation-menu";
 
-import logo from "./../public/shuddhoghor-logo.jpg"
+import logo from "./../public/shuddhoghor-logo.jpg";
+import { cn } from "@/lib/utils";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./ui/collapsible";
+
+const caterise: {
+  title: string;
+  href: string;
+  description: string;
+  image: string;
+}[] = [
+  {
+    title: "Mangos",
+    href: "/products?category=mangos",
+    image: "",
+    description:
+      "Mangos are a type of fruit that are popular in many parts of the world.",
+  },
+  {
+    title: "Pomegranate",
+    href: "/products?category=pomegranate",
+    image: "",
+    description:
+      "Pomegranates are a type of fruit that are popular in many parts of the world.",
+  },
+  {
+    title: "Pineapple",
+    href: "/products?category=pineapple",
+    image: "",
+    description:
+      "Pineapples are a type of fruit that are popular in many parts of the world.",
+  },
+];
 
 export function Header() {
-  const [isVisible, setIsVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY
+      const currentScrollY = window.scrollY;
 
       if (currentScrollY > lastScrollY) {
         // Scrolling down
-        setIsVisible(false)
+        setIsVisible(false);
       } else {
         // Scrolling up
-        setIsVisible(true)
+        setIsVisible(true);
       }
 
-      setLastScrollY(currentScrollY)
-    }
+      setLastScrollY(currentScrollY);
+    };
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
-  }, [lastScrollY])
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY]);
 
   const navigationItems = [
     { title: "Home", href: "/" },
     { title: "Products", href: "/products" },
-    { title: "About", href: "/about" },
-    { title: "Contact", href: "/contact" },
-    { title: "Blog", href: "/blog" },
-    { title: "FAQ", href: "/faq" },
-  ]
+  ];
 
   return (
     <header
@@ -59,7 +98,7 @@ export function Header() {
       }`}
     >
       {/* Top bar */}
-      <div className="bg-secondary container flex h-10 items-center justify-between px-4 text-sm">
+      <div className="bg-secondary flex h-10 items-center justify-between px-4 text-sm">
         <div className="flex items-center gap-2">
           <Phone className="h-4 w-4" />
           <Link href="tel:01xxxxxxxx" className="hidden sm:inline">
@@ -67,7 +106,8 @@ export function Header() {
           </Link>
         </div>
         <span className="hidden md:inline">
-          JavaScript is a programming language mainly used to make websites interactive.
+          JavaScript is a programming language mainly used to make websites
+          interactive.
         </span>
         <div className="hidden sm:flex items-center gap-4">
           <Link href="/about" className="text-sm hover:underline">
@@ -80,7 +120,7 @@ export function Header() {
       </div>
 
       {/* Main navigation */}
-      <div className="bg-background container flex h-16 items-center justify-between px-4">
+      <div className="bg-background flex h-16 items-center justify-between px-4">
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2">
           <Image src={logo || ""} alt="logo" width={40} height={40} />
@@ -92,10 +132,30 @@ export function Header() {
             {navigationItems.map((item) => (
               <NavigationMenuItem key={item.title}>
                 <Link href={item.href} passHref>
-                  <NavigationMenuLink className="px-3 py-2 text-sm font-medium">{item.title}</NavigationMenuLink>
+                  <NavigationMenuLink className="px-3 py-2 text-sm font-medium">
+                    {item.title}
+                  </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
             ))}
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="cursor-pointer">
+                Categories
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                  {caterise.map((component) => (
+                    <ListItem
+                      key={component.title}
+                      title={component.title}
+                      href={component.href}
+                    >
+                      {component.description}
+                    </ListItem>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -107,20 +167,50 @@ export function Header() {
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[250px] sm:w-[300px]">
-            <div className="flex flex-col gap-6 py-6">
-              <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
-                <Image src="/placeholder.svg?height=40&width=40" alt="logo" width={40} height={40} />
+          <SheetContent side="left" className="w-[250px] sm:w-[300px] px-4">
+            <div className="flex flex-col gap-6 py-4">
+              <Link
+                href="/"
+                className="flex items-center gap-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Image src={logo} alt="logo" width={40} height={40} />
                 <span className="font-bold text-xl">Shuddhoghor</span>
               </Link>
               <nav className="flex flex-col gap-4">
                 {navigationItems.map((item) => (
                   <SheetClose asChild key={item.title}>
-                    <Link href={item.href} className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link
+                      href={item.href}
+                      className="font-medium text-lg hover:text-primary transition-colors"
+                    >
                       {item.title}
                     </Link>
                   </SheetClose>
                 ))}
+
+                <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+                  <div className="flex items-center justify-between">
+                    <CollapsibleTrigger asChild>
+                      <p className="text-lg font-medium hover:text-primary transition-colors w-full flex items-center justify-between gap-2.5">
+                        <span>Categories</span>{" "}
+                        <ChevronsUpDown className="w-5 h-5" />
+                        <span className="sr-only">Toggle</span>
+                      </p>
+                    </CollapsibleTrigger>
+                  </div>
+
+                  <CollapsibleContent className="mt-2 ml-4 flex flex-col gap-2 text-lg">
+                    {caterise.map((component) => (
+                      <Link
+                        className="font-medium hover:text-primary transition-colors"
+                        href={component.href}
+                      >
+                        {component.title}
+                      </Link>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
               </nav>
               <div className="mt-auto pt-6 border-t">
                 <div className="flex flex-col gap-4">
@@ -151,5 +241,31 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }
+
+const ListItem = React.forwardRef<
+  React.ComponentRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, href = "#", ...props }) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <Link
+          href={href}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-base font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </Link>
+      </NavigationMenuLink>
+    </li>
+  );
+});
+ListItem.displayName = "ListItem";

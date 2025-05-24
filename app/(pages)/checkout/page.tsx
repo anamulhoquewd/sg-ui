@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Footer } from "@/components/footer";
 import { CheckoutForm } from "@/components/checkout-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -421,7 +420,6 @@ export default function CheckoutPage() {
           <CheckoutForm subtotal={subtotal} />
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
