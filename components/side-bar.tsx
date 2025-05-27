@@ -21,11 +21,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { navigation } from "@/config/navigation";
-import {
-  ChevronRight,
-  LayoutDashboard,
-  SettingsIcon,
-} from "lucide-react";
+import { ChevronRight, LayoutDashboard, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 
 export function AppSidebar({ className }: { className?: string }) {
@@ -35,7 +31,7 @@ export function AppSidebar({ className }: { className?: string }) {
     <Sidebar collapsible="icon" className={className}>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupLabel>Admin Dashboard</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>

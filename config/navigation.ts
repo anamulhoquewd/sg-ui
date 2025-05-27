@@ -7,15 +7,14 @@ import {
 } from "lucide-react";
 
 const navigation = [
-
   {
     icon: Package,
     title: "Products",
     children: [
       { title: "All Products", url: "/admin/products" },
       { title: "Add Product", url: "/admin/products/new" },
-      { title: "Categories", url: "/admin/products/categories" },
-      { title: "Inventory", url: "/admin/products/inventory" },
+      // { title: "Categories", url: "/admin/products/categories" },
+      // { title: "Inventory", url: "/admin/products/inventory" },
     ],
   },
   {
@@ -35,8 +34,8 @@ const navigation = [
     title: "Users",
     children: [
       { title: "All Users", url: "/admin/users" },
-      { title: "Admins", url: "/admin/users/admins" },
-      { title: "Customers", url: "/admin/users/customers" },
+      { title: "Admins", url: "/admin/users?role=admins" },
+      { title: "Customers", url: "/admin/users?role=customers" },
       { title: "Add User", url: "/admin/users/new" },
     ],
   },
@@ -47,7 +46,7 @@ const navigation = [
       { title: "Sales", url: "/admin/analytics/sales" },
       { title: "Products", url: "/admin/analytics/products" },
       { title: "Customers", url: "/admin/analytics/customers" },
-      { title: "Reports", url: "/admin/analytics/reports" },
+      // { title: "Reports", url: "/admin/analytics/reports" },
     ],
   },
   {
@@ -55,11 +54,12 @@ const navigation = [
     title: "Payments",
     children: [
       { title: "Transactions", url: "/admin/payments" },
-      { title: "Refunds", url: "/admin/payments/refunds" },
-      { title: "Payment Methods", url: "/admin/payments/methods" },
+      { title: "Completed", url: "/admin/payments?status=completed" },
+      { title: "Pending", url: "/admin/payments?status=pending" },
+      { title: "Failed", url: "/admin/payments?status=failed" },
+      { title: "Refunds", url: "/admin/payments?status=refunds" },
     ],
   },
-
 ];
 
 export { navigation };
