@@ -1,2 +1,1 @@
-# sg-ui
-Shuddhoghor user interface.
+**work in progress.**
