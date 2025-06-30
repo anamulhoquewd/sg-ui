@@ -4,6 +4,7 @@ import {
   Users,
   BarChart3,
   CreditCard,
+  ListIcon as CategoryIcon,
 } from "lucide-react";
 
 const navigation = [
@@ -16,6 +17,11 @@ const navigation = [
       // { title: "Categories", url: "/admin/products/categories" },
       // { title: "Inventory", url: "/admin/products/inventory" },
     ],
+  },
+  {
+    icon: CategoryIcon,
+    title: "Categories",
+    children: [{ title: "All Categories", url: "/admin/categories" }],
   },
   {
     icon: ShoppingCart,

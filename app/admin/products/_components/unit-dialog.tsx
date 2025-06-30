@@ -39,7 +39,7 @@ const unitFormSchema = z.object({
     .number()
     .int()
     .min(1, "Threshold must be at least 1"),
-  originalPrice: z.coerce.number().min(0, "Price must be a positive number"),
+  price: z.coerce.number().min(0, "Price must be a positive number"),
   costPerItem: z.coerce.number().min(0, "Cost must be a positive number"),
   stockQuantity: z.coerce
     .number()
@@ -71,7 +71,7 @@ export function UnitDialog({
     defaultValues: {
       status: product?.status || "inStock",
       lowStockThreshold: product?.lowStockThreshold || 20,
-      originalPrice: product?.unit?.originalPrice || 0,
+      price: product?.unit?.price || 0,
       costPerItem: product?.unit?.costPerItem || 0,
       stockQuantity: product?.unit?.stockQuantity || 0,
       averageWeightPerFruit: product?.unit?.averageWeightPerFruit || "",
@@ -82,8 +82,6 @@ export function UnitDialog({
   const onSubmit = async (data: UnitFormValues) => {
     setIsPending(true);
     try {
-      // In a real app, you would make an API call here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
       onUpdate(data);
     } catch (error) {
       console.error("Error updating unit information:", error);
@@ -106,7 +104,7 @@ export function UnitDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 items-start">
               <FormField
                 control={form.control}
                 name="status"
@@ -118,7 +116,7 @@ export function UnitDialog({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -141,9 +139,9 @@ export function UnitDialog({
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
-                    <FormDescription>
+                    {/* <FormDescription>
                       Alert when stock falls below this number
-                    </FormDescription>
+                    </FormDescription> */}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -152,10 +150,10 @@ export function UnitDialog({
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="originalPrice"
+                name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Original Price (৳)</FormLabel>
+                    <FormLabel>Price</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -168,7 +166,7 @@ export function UnitDialog({
                 name="costPerItem"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cost Per Item (৳)</FormLabel>
+                    <FormLabel>Cost Per Item</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -202,18 +200,13 @@ export function UnitDialog({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select unit type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="piece">Piece</SelectItem>
                         <SelectItem value="kg">Kilogram (kg)</SelectItem>
-                        <SelectItem value="g">Gram (g)</SelectItem>
-                        <SelectItem value="lb">Pound (lb)</SelectItem>
-                        <SelectItem value="box">Box</SelectItem>
-                        <SelectItem value="bottle">Bottle</SelectItem>
-                        <SelectItem value="pack">Pack</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

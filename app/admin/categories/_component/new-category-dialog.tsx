@@ -4,7 +4,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { FileText } from "lucide-react";
+import { ListIcon as Category } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,46 +27,43 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-const generalFormSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  title: z.string().min(2, "Title must be at least 2 characters"),
-  shortDescription: z.string().optional(),
-  longDescription: z.string().optional(),
+const categoryFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  slug: z.string().min(1, "Slug is required"),
+  description: z.string().optional(),
 });
 
-type GeneralFormValues = z.infer<typeof generalFormSchema>;
+type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
-interface GeneralDialogProps {
+interface CategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product: any;
-  onUpdate: (data: GeneralFormValues) => void;
+  onSubmit: (data: CategoryFormValues) => void;
 }
 
-export function GeneralDialog({
+export default function NewCategory({
   open,
   onOpenChange,
-  product,
-  onUpdate,
-}: GeneralDialogProps) {
+  onSubmit,
+}: CategoryDialogProps) {
   const [isPending, setIsPending] = useState(false);
-
-  const form = useForm<GeneralFormValues>({
-    resolver: zodResolver(generalFormSchema),
+  const form = useForm<CategoryFormValues>({
+    resolver: zodResolver(categoryFormSchema),
     defaultValues: {
-      name: product?.name || "",
-      title: product?.title || "",
-      shortDescription: product?.shortDescription || "",
-      longDescription: product?.longDescription || "",
+      name: "",
+      slug: "",
+      description: "",
     },
   });
 
-  const onSubmit = async (data: GeneralFormValues) => {
+  const firstSubmit = async (data: CategoryFormValues) => {
     setIsPending(true);
     try {
-      onUpdate(data);
+      onSubmit(data);
+      // Reset form after submission
+      form.reset();
     } catch (error) {
-      console.error("Error updating general information:", error);
+      console.error("Error updating category:", error);
     } finally {
       setIsPending(false);
     }
@@ -74,24 +71,22 @@ export function GeneralDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Update General Information
+            <Category className="h-5 w-5" />
+            New Category
           </DialogTitle>
-          <DialogDescription>
-            Update the name, title, and descriptions for {product?.name}.
-          </DialogDescription>
+          <DialogDescription>Create a new category.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(firstSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Product Name</FormLabel>
+                  <FormLabel className="cursor-pointer">Product Name</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -104,15 +99,15 @@ export function GeneralDialog({
             />
             <FormField
               control={form.control}
-              name="title"
+              name="slug"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Product Title</FormLabel>
+                  <FormLabel className="cursor-pointer">Product Slug</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
                   <FormDescription>
-                    The title displayed on the product page
+                    The unique identifier for the category
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -120,40 +115,27 @@ export function GeneralDialog({
             />
             <FormField
               control={form.control}
-              name="shortDescription"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Short Description</FormLabel>
+                  <FormLabel className="cursor-pointer">
+                    Category Description
+                  </FormLabel>
                   <FormControl>
                     <Textarea
+                      placeholder="Enter category description"
+                      className="min-h-16"
                       {...field}
-                      placeholder="Brief description for product listings"
-                      className="resize-none"
-                      rows={2}
                     />
                   </FormControl>
+                  <FormDescription>
+                    The description displayed in category listings
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="longDescription"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Long Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Detailed description for the product page"
-                      className="resize-none"
-                      rows={4}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <DialogFooter>
               <Button
                 type="button"
@@ -163,7 +145,7 @@ export function GeneralDialog({
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Updating..." : "Update General Information"}
+                {isPending ? "Creating..." : "Create Category"}
               </Button>
             </DialogFooter>
           </form>

@@ -1,49 +1,73 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { ArrowLeft, Save, User } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { ArrowLeft, Save, User } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Switch } from "@/components/ui/switch"
-import { toast } from "sonner"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 // Form schema
 const userFormSchema = z
   .object({
     name: z.string().min(2, { message: "Name must be at least 2 characters." }),
     email: z.string().email({ message: "Please enter a valid email address." }),
-    phone: z.string().min(10, { message: "Phone number must be at least 10 characters." }),
+    phone: z
+      .string()
+      .min(10, { message: "Phone number must be at least 10 characters." }),
     role: z.enum(["admin", "staff", "customer"], {
       required_error: "Please select a role.",
     }),
-    password: z.string().min(8, { message: "Password must be at least 8 characters." }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters." }),
     confirmPassword: z.string(),
     isActive: z.boolean().default(true),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
-  })
+  });
 
-type UserFormValues = z.infer<typeof userFormSchema>
+type UserFormValues = z.infer<typeof userFormSchema>;
 
 export default function NewUserPage() {
-  const router = useRouter()
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize form with default values
   const form = useForm<UserFormValues>({
@@ -57,40 +81,37 @@ export default function NewUserPage() {
       confirmPassword: "",
       isActive: true,
     },
-  })
+  });
 
   // Handle avatar upload
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      setAvatarUrl(URL.createObjectURL(file))
+      const file = e.target.files[0];
+      setAvatarUrl(URL.createObjectURL(file));
     }
-  }
+  };
 
   // Form submission
   const onSubmit = async (data: UserFormValues) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       // In a real app, you would upload avatar and submit data to your API
-      console.log("Form data:", data)
-      console.log("Avatar:", avatarUrl)
 
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      toast("Event has been created.")
+      toast("Event has been created.");
 
       // Navigate back to users list
-      router.push("/admin/users")
+      router.push("/admin/users");
     } catch (error) {
-      console.error("Error creating user:", error)
-      toast("Event has been created.")
-
+      console.error("Error creating user:", error);
+      toast("Event has been created.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -125,7 +146,9 @@ export default function NewUserPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>User Information</CardTitle>
-                  <CardDescription>Enter the details for the new user.</CardDescription>
+                  <CardDescription>
+                    Enter the details for the new user.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6 mb-6">
@@ -133,10 +156,17 @@ export default function NewUserPage() {
                       <Avatar className="h-24 w-24">
                         <AvatarImage src={avatarUrl || ""} alt="Avatar" />
                         <AvatarFallback className="text-2xl">
-                          {form.watch("name") ? form.watch("name").charAt(0).toUpperCase() : <User />}
+                          {form.watch("name") ? (
+                            form.watch("name").charAt(0).toUpperCase()
+                          ) : (
+                            <User />
+                          )}
                         </AvatarFallback>
                       </Avatar>
-                      <Label htmlFor="avatar-upload" className="cursor-pointer text-sm text-primary hover:underline">
+                      <Label
+                        htmlFor="avatar-upload"
+                        className="cursor-pointer text-sm text-primary hover:underline"
+                      >
                         Upload Avatar
                       </Label>
                       <Input
@@ -169,7 +199,11 @@ export default function NewUserPage() {
                             <FormItem>
                               <FormLabel>Email Address</FormLabel>
                               <FormControl>
-                                <Input type="email" placeholder="Enter email address" {...field} />
+                                <Input
+                                  type="email"
+                                  placeholder="Enter email address"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -182,7 +216,10 @@ export default function NewUserPage() {
                             <FormItem>
                               <FormLabel>Phone Number</FormLabel>
                               <FormControl>
-                                <Input placeholder="Enter phone number" {...field} />
+                                <Input
+                                  placeholder="Enter phone number"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -200,7 +237,11 @@ export default function NewUserPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Enter password" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Enter password"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -213,7 +254,11 @@ export default function NewUserPage() {
                         <FormItem>
                           <FormLabel>Confirm Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Confirm password" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Confirm password"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -237,7 +282,10 @@ export default function NewUserPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>User Role</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a role" />
@@ -249,7 +297,9 @@ export default function NewUserPage() {
                             <SelectItem value="customer">Customer</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormDescription>This determines what permissions the user will have.</FormDescription>
+                        <FormDescription>
+                          This determines what permissions the user will have.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -261,10 +311,15 @@ export default function NewUserPage() {
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 mt-4">
                         <div className="space-y-0.5">
                           <FormLabel>Account Status</FormLabel>
-                          <FormDescription>Active accounts can log in to the system</FormDescription>
+                          <FormDescription>
+                            Active accounts can log in to the system
+                          </FormDescription>
                         </div>
                         <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -309,5 +364,5 @@ export default function NewUserPage() {
         </form>
       </Form>
     </div>
-  )
+  );
 }

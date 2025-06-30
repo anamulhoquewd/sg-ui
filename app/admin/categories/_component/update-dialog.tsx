@@ -24,16 +24,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const categoryFormSchema = z.object({
-  category: z.string().min(1, "Please select a category"),
+  name: z.string().min(1, "Name is required").optional(),
+  slug: z.string().min(1, "Slug is required").optional(),
+  description: z.string().optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
@@ -41,16 +38,19 @@ type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 interface CategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product: any;
-  categories: { _id: string; name: string }[];
+  category: {
+    _id: string;
+    name: string;
+    slug: string;
+    description: string;
+  } | null;
   onUpdate: (data: CategoryFormValues) => void;
 }
 
-export function CategoryDialog({
+export default function UpdateDialog({
   open,
   onOpenChange,
-  product,
-  categories,
+  category,
   onUpdate,
 }: CategoryDialogProps) {
   const [isPending, setIsPending] = useState(false);
@@ -58,7 +58,9 @@ export function CategoryDialog({
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
-      category: product?.category._id || "",
+      name: category?.name || "",
+      slug: category?.slug || "",
+      description: category?.description || "",
     },
   });
 
@@ -82,41 +84,50 @@ export function CategoryDialog({
             Update Category
           </DialogTitle>
           <DialogDescription>
-            Change the category for {product?.name}.
+            Change the category for {category?.name}.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="category"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category._id} value={category._id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel className="cursor-pointer">Product Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
                   <FormDescription>
-                    Select the most appropriate category for this product
+                    The name displayed in product listings
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="cursor-pointer">
+                    Category Description
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter category description"
+                      className="min-h-16"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    The description displayed in category listings
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <DialogFooter>
               <Button
                 type="button"

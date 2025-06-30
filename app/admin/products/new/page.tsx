@@ -9,7 +9,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Upload, X, ArrowLeft, Save, CalendarIcon } from "lucide-react";
+import { Upload, X, ArrowLeft, Save } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,28 +38,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import axios from "axios";
 import { handleAxiosError } from "@/utils/error";
 import api from "@/axios/interceptor";
-
-// Sample categories data
-const dameCategories = [
-  { _id: "6836aa9148cc37b282d69ac2", name: "Mangoes" },
-  { _id: "683b512551d36051b14f1f49", name: "Pomegranate" },
-  { _id: "683b513d51d36051b14f1f4c", name: "Pineapple" },
-];
 
 interface ProductDiscunt {
   discountType: "percentage" | "flat";
@@ -74,6 +57,13 @@ interface ProductUnit {
   costPerItem: number;
   stockQuantity: number;
   averageWeightPerFruit?: string;
+}
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
 }
 
 export interface ProductDocument extends Document {
@@ -131,7 +121,7 @@ const productFormSchema = z.object({
   unit: z.object({
     unitType: z.enum(["kg", "piece"]),
     averageWeightPerFruit: z.string(),
-    originalPrice: z.coerce
+    price: z.coerce
       .number()
       .positive({ message: "Original Price must be a positive number." }),
     costPerItem: z.coerce
@@ -145,22 +135,16 @@ const productFormSchema = z.object({
 
   lowStockThreshold: z.coerce.number().nonnegative(),
   averageWeightPerFruit: z.string().optional(),
-
-  discount: z
-    .object({
-      discountType: z.enum(["flat", "percentage"]).optional(),
-      discountValue: z.coerce.number().optional(),
-      discountExp: z.coerce.date().optional(), // be sure it's passed as Date or a parsable string
-    })
-    .optional(),
 });
 
 export default function NewProductPage() {
   const [images, setImages] = useState<{ url: string; file?: File }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const router = useRouter();
+
   // Categories
-  const [categories, setCategories] = useState(dameCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     // Fetch categories
@@ -197,15 +181,10 @@ export default function NewProductPage() {
       lowStockThreshold: 20,
       status: "inStock",
       unit: {
-        originalPrice: 0,
+        price: 0,
         costPerItem: 0,
         stockQuantity: 0,
         averageWeightPerFruit: "",
-      },
-      discount: {
-        discountType: undefined,
-        discountValue: 0,
-        discountExp: undefined,
       },
     },
   });
@@ -230,9 +209,15 @@ export default function NewProductPage() {
   const onSubmit = async (data: z.infer<typeof productFormSchema>) => {
     setIsSubmitting(true);
 
-    console.log("Data: ", data);
     try {
       const formData = new FormData();
+
+      const hasImages = images.some((image) => image?.file);
+
+      if (!hasImages) {
+        toast("At least one image is required");
+        throw new Error("At least one image is required.");
+      }
 
       // Append images
       images.forEach((image) => {
@@ -241,42 +226,44 @@ export default function NewProductPage() {
         }
       });
 
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/products/register",
-        { ...data }
-      );
+      const [productResponse, mediaResponse] = await Promise.all([
+        api.post("http://localhost:3000/api/v1/products/register", {
+          ...data,
+        }),
+        api.post(`/products/media?slug=${data.slug}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }),
+      ]);
 
-      if (!response.data.success) {
+      if (!productResponse.data.success) {
+        toast(productResponse.data?.error?.message || "Something went wrong");
         throw new Error(
-          response.data?.error?.message || "Something with wrong"
+          productResponse.data?.error?.message || "Something with wrong"
+        );
+      }
+      if (!mediaResponse.data.success) {
+        toast(mediaResponse.data?.error?.message || "Something went wrong");
+        throw new Error(
+          mediaResponse.data?.error?.message || "Something with wrong"
         );
       }
 
       // Submit
-      const mediaResponse = await axios.post(
-        `http://localhost:3000/api/v1/products/media?slug=${data.slug}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
 
-      await api.patch(`/products/${response.data.data._id}/media`, data);
+      await api.patch(`/products/${productResponse.data.data._id}/media`, {
+        urls: mediaResponse.data.data,
+      });
 
-      toast(response.data?.message || "Product has been created.");
+      toast(productResponse.data?.message || "Product has been created.");
       toast(mediaResponse.data?.message || "Files has been uploaded in S3.");
 
       form.reset();
 
-      // router.push("/admin/products");
+      router.push("/admin/products");
     } catch (error: any) {
       console.error("Error creating product: ", error);
-
-      toast(
-        error.response.data?.error?.message || error.response.data?.message
-      );
     } finally {
       setIsSubmitting(false);
     }
@@ -472,10 +459,10 @@ export default function NewProductPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                     <FormField
                       control={form.control}
-                      name="unit.originalPrice"
+                      name="unit.price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Original Price</FormLabel>
+                          <FormLabel>Price</FormLabel>
                           <FormControl>
                             <Input type="number" min="0" step="1" {...field} />
                           </FormControl>
@@ -561,106 +548,6 @@ export default function NewProductPage() {
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              {/* Discount */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Discount</CardTitle>
-                  <CardDescription>Manage discoutns.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 itesm-start">
-                    <FormField
-                      control={form.control}
-                      name="discount.discountType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Discount Type</FormLabel>
-                          <FormControl>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value as string}
-                            >
-                              <FormControl>
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Select a type" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value={"percentage"}>
-                                  Percentage
-                                </SelectItem>
-                                <SelectItem value={"flat"}>Flat</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="discount.discountValue"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Discount Value</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min="0"
-                              step="1"
-                              placeholder="Enter discount value"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="discount.discountExp"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Discount Exp</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-auto p-0"
-                              align="start"
-                            >
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) => date < new Date()}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
                           <FormMessage />
                         </FormItem>
                       )}

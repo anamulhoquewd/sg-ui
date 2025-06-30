@@ -20,8 +20,6 @@ const useAvatar = () => {
     const formData = new FormData();
     formData.append("avatar", file);
 
-    console.log("Form Data: ", formData);
-
     // try {
     //   const response = await axios.post(
     //     `/users/uploads-avatar?filename=${file.name.split(" ").join("-")}`,

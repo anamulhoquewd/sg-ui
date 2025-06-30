@@ -6,14 +6,11 @@ import Image from "next/image";
 import {
   Search,
   Plus,
-  Filter,
-  ArrowUpDown,
   MoreHorizontal,
   Edit,
   Trash2,
   Eye,
   Package,
-  Percent,
   ListIcon as Category,
   EyeIcon,
   EyeOff,
@@ -55,7 +52,6 @@ import {
 
 import { UnitDialog } from "./_components/unit-dialog";
 import { GeneralDialog } from "./_components/general-dialog";
-import { DiscountDialog } from "./_components/discount-dialog";
 import { CategoryDialog } from "./_components/category-dialog";
 import { VisibilityDialog } from "./_components/visibility-dialog";
 import { MediaDialog } from "./_components/media-dialog";
@@ -64,6 +60,10 @@ import api from "@/axios/interceptor";
 import Paginations from "@/components/pagination";
 import { defaultPagination } from "@/utils/details";
 import { handleAxiosError } from "@/utils/error";
+import { toast } from "sonner";
+import { DeleteDialog } from "./_components/delete-dialong";
+import { ca } from "date-fns/locale";
+import { Product } from "@/components/product-page";
 
 export interface Pagination {
   page: number;
@@ -73,221 +73,22 @@ export interface Pagination {
   prevPage: number | null;
 }
 
-// Sample product data based on the provided structure
-const dameProducts = [
-  {
-    unit: {
-      unitType: "piece",
-      originalPrice: 1003,
-      costPerItem: 50,
-      stockQuantity: 140,
-      averageWeightPerFruit: "",
-      price: 1003,
-    },
-    discount: {
-      discountType: "percentage",
-      discountValue: 12,
-      discountExp: "2025-06-03T18:00:00.000Z",
-    },
-    _id: "683b57940ea47011056dd3a5",
-    slug: "new-product4",
-    name: "this is new product",
-    title: "this is new product",
-    media: [
-      {
-        alt: "new-product4",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/new-product4/ChatGPT-Image-May-6,-2025,-08_34_13-PM-1748719496394.jpeg",
-      },
-      {
-        alt: "new-product4",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/new-product4/man-holding-pile-clean-clothes-1748719496394.jpeg",
-      },
-      {
-        alt: "new-product4",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/new-product4/1747387386983-1748719496394.jpeg",
-      },
-    ],
-    status: "lowStock",
-    visibility: true,
-    isPopular: false,
-    lowStockThreshold: 5,
-    category: {
-      _id: "683b512551d36051b14f1f49",
-      slug: "pomegranate",
-      name: "Pomegranate",
-      shortDescription: "This is very popular item in bangladesh now.",
-      createdAt: "2025-05-31T18:57:41.136Z",
-      updatedAt: "2025-05-31T18:57:41.136Z",
-      __v: 0,
-    },
-    createdAt: "2025-05-31T19:25:08.630Z",
-    updatedAt: "2025-05-31T19:25:08.630Z",
-    __v: 0,
-  },
-  {
-    unit: {
-      unitType: "piece",
-      originalPrice: 1003,
-      costPerItem: 50,
-      stockQuantity: 140,
-      averageWeightPerFruit: "",
-      price: 1003,
-    },
-    discount: {
-      discountType: "percentage",
-      discountValue: 12,
-      discountExp: "2025-06-03T18:00:00.000Z",
-    },
-    _id: "683b56db91f6d2ad979e9d97",
-    slug: "new-product2",
-    name: "this is new product",
-    title: "this is new product",
-    media: [
-      {
-        alt: "new-product2",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/new-product2/ChatGPT-Image-May-6,-2025,-08_34_13-PM-1748719309922.jpeg",
-      },
-      {
-        alt: "new-product2",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/new-product2/man-holding-pile-clean-clothes-1748719309922.jpeg",
-      },
-      {
-        alt: "new-product2",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/new-product2/1747387386983-1748719309922.jpeg",
-      },
-    ],
-    status: "lowStock",
-    visibility: true,
-    isPopular: false,
-    lowStockThreshold: 5,
-    category: {
-      _id: "683b512551d36051b14f1f49",
-      slug: "pomegranate",
-      name: "Pomegranate",
-      shortDescription: "This is very popular item in bangladesh now.",
-      createdAt: "2025-05-31T18:57:41.136Z",
-      updatedAt: "2025-05-31T18:57:41.136Z",
-      __v: 0,
-    },
-    createdAt: "2025-05-31T19:22:03.674Z",
-    updatedAt: "2025-05-31T19:22:03.674Z",
-    __v: 0,
-  },
-  {
-    unit: {
-      unitType: "piece",
-      originalPrice: 1003,
-      costPerItem: 50,
-      stockQuantity: 140,
-      averageWeightPerFruit: "",
-      price: 1003,
-    },
-    _id: "683b558bcfba0bfcfd78e2f7",
-    slug: "new-product",
-    name: "this is new product",
-    title: "this is new product",
-    media: [
-      {
-        alt: "new-product",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/new-product/ChatGPT-Image-May-6,-2025,-08_34_13-PM-1748718975177.jpeg",
-      },
-      {
-        alt: "new-product",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/new-product/man-holding-pile-clean-clothes-1748718975177.jpeg",
-      },
-      {
-        alt: "new-product",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/new-product/1747387386983-1748718975177.jpeg",
-      },
-    ],
-    status: "lowStock",
-    visibility: true,
-    isPopular: false,
-    lowStockThreshold: 5,
-    category: {
-      _id: "683b512551d36051b14f1f49",
-      slug: "pomegranate",
-      name: "Pomegranate",
-      shortDescription: "This is very popular item in bangladesh now.",
-      createdAt: "2025-05-31T18:57:41.136Z",
-      updatedAt: "2025-05-31T18:57:41.136Z",
-      __v: 0,
-    },
-    createdAt: "2025-05-31T19:16:27.888Z",
-    updatedAt: "2025-05-31T19:16:27.888Z",
-    __v: 0,
-  },
-  {
-    unit: {
-      unitType: "kg",
-      originalPrice: 4200,
-      costPerItem: 10,
-      stockQuantity: 20,
-      averageWeightPerFruit: "",
-      price: 4200,
-    },
-    _id: "683b4ec05c7ce09de19ebba5",
-    slug: "mango",
-    name: "Mango",
-    title: "sdfsfsfsfs",
-    origin: "hhdhd",
-    shortDescription: "fsdfsdfsfsfsfsdfsfsdf",
-    longDescription: "sdfsdfsdfsdfsdfsfsfsfsdfsdfsdsfsfsfsdfsdfsdfsdfsdfsdf",
-    media: [
-      {
-        alt: "mango",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/mango/man-holding-pile-clean-clothes-1748717240819.jpeg",
-        _id: "683b4ec05c7ce09de19ebba6",
-      },
-      {
-        alt: "mango",
-        url: "https://sg-products.s3.eu-north-1.amazonaws.com/products/mango/1747387386983-1748717240819.jpeg",
-        _id: "683b4ec05c7ce09de19ebba7",
-      },
-    ],
-    status: "inStock",
-    visibility: true,
-    season: "dfdfh",
-    isPopular: false,
-    lowStockThreshold: 69,
-    category: {
-      _id: "6836aa9148cc37b282d69ac2",
-      slug: "mangos",
-      name: "Mango",
-      shortDescription: "This is very popular item in bangladesh now.",
-      createdAt: "2025-05-28T06:17:53.977Z",
-      updatedAt: "2025-05-28T06:17:53.977Z",
-      __v: 0,
-    },
-    createdAt: "2025-05-31T18:47:28.397Z",
-    updatedAt: "2025-05-31T18:47:28.397Z",
-    __v: 0,
-  },
-];
-
-// Category data for dropdown
-const dameCategories = [
-  { _id: "683b512551d36051b14f1f49", name: "Mangoes" },
-  { _id: "683b512551d36051b14f1f50", name: "Honey" },
-  { _id: "683b512551d36051b14f1f51", name: "Bundles" },
-];
-
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [categories, setCategories] = useState(dameCategories);
-  const [products, setProducts] = useState(dameProducts);
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState<Pagination>(defaultPagination);
 
   // Dialog states
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [unitDialogOpen, setUnitDialogOpen] = useState(false);
   const [generalDialogOpen, setGeneralDialogOpen] = useState(false);
-  const [discountDialogOpen, setDiscountDialogOpen] = useState(false);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [visibilityDialogOpen, setVisibilityDialogOpen] = useState(false);
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Fetch products
   const getProducts = async ({
@@ -375,9 +176,6 @@ export default function ProductsPage() {
       case "general":
         setGeneralDialogOpen(true);
         break;
-      case "discount":
-        setDiscountDialogOpen(true);
-        break;
       case "category":
         setCategoryDialogOpen(true);
         break;
@@ -387,6 +185,26 @@ export default function ProductsPage() {
       case "media":
         setMediaDialogOpen(true);
         break;
+      case "delete":
+        setDeleteDialogOpen(true);
+        break;
+      default:
+        console.error("Unknown dialog type:", dialogType);
+    }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    try {
+      const response = await api.delete(`/products/${id}`);
+
+      if (!response.data.success) {
+        throw new Error(response.data.error.message || "Something with wrong!");
+      }
+
+      toast(response?.data?.message || "Product deleted successfully!");
+      getProducts({ page: pagination.page, searchQuery, categoryFilter });
+    } catch (error) {
+      handleAxiosError(error);
     }
   };
 
@@ -395,19 +213,68 @@ export default function ProductsPage() {
     // Here you would make an API call to update the product
     // After successful update, you would refresh the product list
 
-    console.log("Data: ", data);
-    console.log("Type: ", type);
-
     try {
-      const response = await api.patch(
-        `/products/${selectedProduct._id}/${type}`,
-        data
-      );
+      if (type === "media") {
+        if (data.mediaToDelete.length > 0) {
+          const response = await api.delete(
+            `/products/${selectedProduct._id}/${type}`,
+            { data: { urls: data.mediaToDelete } }
+          );
 
-      if (!response.data.success) {
-        throw new Error(response.data.error.message || "Something with wrong!");
+          toast(
+            response?.data?.message || "Product media delete is successful!"
+          );
+        }
+
+        if (data.newMedia.length > 0) {
+          const formData = new FormData();
+
+          // Append images
+          data.newMedia.forEach((media: any) => {
+            if (media.file) {
+              formData.append("media", media.file);
+            }
+          });
+
+          const urlsResponse = await api.post(`/products/media`, formData, {
+            params: { slug: selectedProduct.slug },
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+
+          if (!urlsResponse.data.success) {
+            throw new Error(
+              urlsResponse.data.error.message || "Something with wrong!"
+            );
+          }
+
+          const updateResponse = await api.patch(
+            `/products/${selectedProduct._id}/media`,
+            {
+              urls: urlsResponse.data.data,
+            }
+          );
+
+          if (!updateResponse.data.success) {
+            throw new Error(
+              updateResponse.data.error.message || "Something with wrong!"
+            );
+          }
+
+          toast(
+            urlsResponse?.data?.message || "Product media posted successful!"
+          );
+          toast(updateResponse?.data?.message || "Product updated successful!");
+        }
+      } else {
+        const response = await api.patch(
+          `/products/${selectedProduct._id}/${type}`,
+          data
+        );
+
+        toast(response?.data?.message || "Product media delete is successful!");
       }
-
       getProducts({ page: pagination.page, searchQuery, categoryFilter });
     } catch (error) {
       handleAxiosError(error);
@@ -420,9 +287,6 @@ export default function ProductsPage() {
         case "general":
           setGeneralDialogOpen(false);
           break;
-        case "discount":
-          setDiscountDialogOpen(false);
-          break;
         case "category":
           setCategoryDialogOpen(false);
           break;
@@ -431,6 +295,9 @@ export default function ProductsPage() {
           break;
         case "media":
           setMediaDialogOpen(false);
+          break;
+        case "delete":
+          setDeleteDialogOpen(false);
           break;
       }
     }
@@ -466,11 +333,6 @@ export default function ProductsPage() {
     return `${price.toLocaleString()}`;
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString();
-  };
-
   const getStockPercentage = (product: any) => {
     // Calculate percentage based on a reasonable maximum (e.g., 5x the low stock threshold)
     const maxExpected = product.lowStockThreshold * 5;
@@ -501,7 +363,7 @@ export default function ProductsPage() {
         <CardHeader>
           <CardTitle>Product Management</CardTitle>
           <CardDescription>
-            You have {products.length} products in your inventory.
+            You have {pagination.total} products in your inventory.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -558,18 +420,19 @@ export default function ProductsPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  products.map((product) => {
+                  products.map((product: Product) => {
                     // Image
                     const mediaUrl =
                       product.media[0]?.url ||
                       "https://placehold.jp/250x250.png?text=Media";
+
                     return (
                       <TableRow key={product._id}>
                         <TableCell>
                           <div className="relative h-10 w-10 overflow-hidden rounded-md">
                             <Image
                               src={mediaUrl}
-                              alt={product.media[0]?.alt || product.name}
+                              alt={product?.media[0]?.alt || product?.name}
                               fill
                               className="object-cover"
                             />
@@ -578,8 +441,11 @@ export default function ProductsPage() {
                         <TableCell className="font-medium">
                           <div>
                             <div>{product.name}</div>
-                            <Link href={`/products/${product.slug}`}>
-                              <div className="text-xs text-muted-foreground">
+                            <Link
+                              target="_blank"
+                              href={`/products/${product.slug}`}
+                            >
+                              <div className="text-xs text-muted-foreground inline">
                                 {product.slug}
                               </div>
                             </Link>
@@ -587,15 +453,7 @@ export default function ProductsPage() {
                         </TableCell>
                         <TableCell>{product?.category.name}</TableCell>
                         <TableCell className="text-right">
-                          <div>
-                            {formatPrice(product.unit.price)}
-                            {product.unit.price <
-                              product.unit.originalPrice && (
-                              <div className="text-xs text-muted-foreground line-through">
-                                {formatPrice(product.unit.originalPrice)}
-                              </div>
-                            )}
-                          </div>
+                          <div>{formatPrice(product.unit.price)}</div>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className=" space-y-1.5">
@@ -676,14 +534,6 @@ export default function ProductsPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() =>
-                                    openDialog(product, "discount")
-                                  }
-                                >
-                                  <Percent className="mr-2 h-4 w-4" />
-                                  Update Discount
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() =>
                                     openDialog(product, "category")
                                   }
                                 >
@@ -715,7 +565,10 @@ export default function ProductsPage() {
                                   <Eye className="mr-2 h-4 w-4" />
                                   View Product
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive">
+                                <DropdownMenuItem
+                                  onClick={() => openDialog(product, "delete")}
+                                  className="text-destructive"
+                                >
                                   <Trash2 className="mr-2 h-4 w-4" />
                                   Delete Product
                                 </DropdownMenuItem>
@@ -731,9 +584,14 @@ export default function ProductsPage() {
             </Table>
           </div>
         </CardContent>
-        <CardFooter className="flex items-center justify-end">
-          <Paginations pagination={pagination} setPagination={setPagination} />
-        </CardFooter>
+        {products.length !== 0 && (
+          <CardFooter className="flex items-center justify-end">
+            <Paginations
+              pagination={pagination}
+              setPagination={setPagination}
+            />
+          </CardFooter>
+        )}
       </Card>
 
       {/* Dialogs for updating different parts of the product */}
@@ -751,13 +609,6 @@ export default function ProductsPage() {
             onOpenChange={setGeneralDialogOpen}
             product={selectedProduct}
             onUpdate={(data) => handleUpdateProduct(data, "general")}
-          />
-
-          <DiscountDialog
-            open={discountDialogOpen}
-            onOpenChange={setDiscountDialogOpen}
-            product={selectedProduct}
-            onUpdate={(data) => handleUpdateProduct(data, "discount")}
           />
 
           <CategoryDialog
@@ -780,6 +631,11 @@ export default function ProductsPage() {
             onOpenChange={setMediaDialogOpen}
             product={selectedProduct}
             onUpdate={(data) => handleUpdateProduct(data, "media")}
+          />
+          <DeleteDialog
+            onConfirm={() => handleDeleteProduct(selectedProduct._id)}
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
           />
         </>
       )}

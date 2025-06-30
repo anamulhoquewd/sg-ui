@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import {
   Accordion,
@@ -24,181 +24,131 @@ import {
 } from "@/components/ui/sheet";
 import Paginations, { Pagination } from "./pagination";
 import { defaultPagination } from "@/utils/details";
-
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice?: number;
-  category: "mango" | "pomegranate" | "pineapple";
-  inStock: boolean;
-  image: string;
-  slug: string;
-}
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Himsagar Mango",
-    description:
-      "বাংলাদেশের নির্দেশক বা জিআই পণ্য হিসেবে স্বীকৃতি পেয়েছে চাঁপাইনবাবগঞ্জের হিমসাগর আম। স্বাদে-গন্ধে অতুলনীয় হিমসাগর আম। চাঁপাইনবাবগঞ্জের এই আমের সুনাম রয়েছে দেশ বিদেশে। জিআই সনদ পাওয়ার পর এখন থেকে চাঁপাইনবাবগঞ্জের পণ্য হিসেবেই বাজারজাত হচ্ছে হিমসাগর আম।",
-    price: 199.99,
-    originalPrice: 249.99,
-    category: "mango",
-    inStock: true,
-    image:
-      "https://ghorerbazar.com/cdn/shop/files/250tk_discount.jpg?v=1747222020&width=360",
-    slug: "/himsagor-mango",
-  },
-  {
-    id: 2,
-    name: "Organic Cotton T-Shirt",
-    description:
-      "বাংলাদেশের নির্দেশক বা জিআই পণ্য হিসেবে স্বীকৃতি পেয়েছে চাঁপাইনবাবগঞ্জের হিমসাগর আম। স্বাদে-গন্ধে অতুলনীয় হিমসাগর আম। চাঁপাইনবাবগঞ্জের এই আমের সুনাম রয়েছে দেশ বিদেশে। জিআই সনদ পাওয়ার পর এখন থেকে চাঁপাইনবাবগঞ্জের পণ্য হিসেবেই বাজারজাত হচ্ছে হিমসাগর আম।",
-    price: 29.99,
-    category: "mango",
-    inStock: true,
-    image:
-      "https://ghorerbazar.com/cdn/shop/products/WhatsApp-Image-2023-05-25-at-12.25.35.jpg?v=1707771681&width=713",
-    slug: "/mango-form-chapai",
-  },
-  {
-    id: 3,
-    name: "pineapple",
-    description:
-      "বাংলাদেশের নির্দেশক বা জিআই পণ্য হিসেবে স্বীকৃতি পেয়েছে চাঁপাইনবাবগঞ্জের হিমসাগর আম। স্বাদে-গন্ধে অতুলনীয় হিমসাগর আম। চাঁপাইনবাবগঞ্জের এই আমের সুনাম রয়েছে দেশ বিদেশে। জিআই সনদ পাওয়ার পর এখন থেকে চাঁপাইনবাবগঞ্জের পণ্য হিসেবেই বাজারজাত হচ্ছে হিমসাগর আম।",
-
-    price: 299.99,
-    category: "pineapple",
-    inStock: false,
-    image:
-      "https://images.unsplash.com/photo-1550828520-4cb496926fc9?q=80&w=500&auto=format&fit=crop",
-    slug: "/pineapple",
-  },
-  {
-    id: 4,
-    name: "Rajshahi Mango",
-    description:
-      "বাংলাদেশের নির্দেশক বা জিআই পণ্য হিসেবে স্বীকৃতি পেয়েছে চাঁপাইনবাবগঞ্জের হিমসাগর আম। স্বাদে-গন্ধে অতুলনীয় হিমসাগর আম। চাঁপাইনবাবগঞ্জের এই আমের সুনাম রয়েছে দেশ বিদেশে। জিআই সনদ পাওয়ার পর এখন থেকে চাঁপাইনবাবগঞ্জের পণ্য হিসেবেই বাজারজাত হচ্ছে হিমসাগর আম।",
-
-    price: 89.99,
-    originalPrice: 119.99,
-    category: "mango",
-    inStock: true,
-    image:
-      "https://ghorerbazar.com/cdn/shop/products/WhatsApp-Image-2023-05-21-at111-13.40.44.jpg?v=1707771681&width=600",
-
-    slug: "/mango-from-rajshahi",
-  },
-  {
-    id: 5,
-    name: "Pomegranate",
-    description:
-      "বাংলাদেশের নির্দেশক বা জিআই পণ্য হিসেবে স্বীকৃতি পেয়েছে চাঁপাইনবাবগঞ্জের হিমসাগর আম। স্বাদে-গন্ধে অতুলনীয় হিমসাগর আম। চাঁপাইনবাবগঞ্জের এই আমের সুনাম রয়েছে দেশ বিদেশে। জিআই সনদ পাওয়ার পর এখন থেকে চাঁপাইনবাবগঞ্জের পণ্য হিসেবেই বাজারজাত হচ্ছে হিমসাগর আম।",
-
-    price: 39.99,
-    category: "pomegranate",
-    inStock: false,
-    slug: "/pomegranate-form-sirajganj",
-    image:
-      "https://images.unsplash.com/photo-1608869857121-c0bcdf4fff2c?q=80&w=500&auto=format&fit=crop",
-  },
-  {
-    id: 6,
-    name: "Pineapple",
-    description:
-      "বাংলাদেশের নির্দেশক বা জিআই পণ্য হিসেবে স্বীকৃতি পেয়েছে চাঁপাইনবাবগঞ্জের হিমসাগর আম। স্বাদে-গন্ধে অতুলনীয় হিমসাগর আম। চাঁপাইনবাবগঞ্জের এই আমের সুনাম রয়েছে দেশ বিদেশে। জিআই সনদ পাওয়ার পর এখন থেকে চাঁপাইনবাবগঞ্জের পণ্য হিসেবেই বাজারজাত হচ্ছে হিমসাগর আম।",
-
-    price: 129.99,
-    category: "pineapple",
-    inStock: true,
-    image:
-      "https://ghorerbazar.com/cdn/shop/files/250tk_discount.jpg?v=1747222020&width=360",
-    slug: "/pineapple-from-sirajganj",
-  },
-  {
-    id: 7,
-    name: "Pomegranate",
-    description:
-      "বাংলাদেশের নির্দেশক বা জিআই পণ্য হিসেবে স্বীকৃতি পেয়েছে চাঁপাইনবাবগঞ্জের হিমসাগর আম। স্বাদে-গন্ধে অতুলনীয় হিমসাগর আম। চাঁপাইনবাবগঞ্জের এই আমের সুনাম রয়েছে দেশ বিদেশে। জিআই সনদ পাওয়ার পর এখন থেকে চাঁপাইনবাবগঞ্জের পণ্য হিসেবেই বাজারজাত হচ্ছে হিমসাগর আম।",
-
-    price: 59.99,
-    category: "pomegranate",
-    inStock: true,
-    slug: "/pomegranate-from-rajshahi",
-    image:
-      "https://images.unsplash.com/photo-1608869857121-c0bcdf4fff2c?q=80&w=500&auto=format&fit=crop",
-  },
-  {
-    id: 8,
-    name: "Pineapple",
-    description:
-      "বাংলাদেশের নির্দেশক বা জিআই পণ্য হিসেবে স্বীকৃতি পেয়েছে চাঁপাইনবাবগঞ্জের হিমসাগর আম। স্বাদে-গন্ধে অতুলনীয় হিমসাগর আম। চাঁপাইনবাবগঞ্জের এই আমের সুনাম রয়েছে দেশ বিদেশে। জিআই সনদ পাওয়ার পর এখন থেকে চাঁপাইনবাবগঞ্জের পণ্য হিসেবেই বাজারজাত হচ্ছে হিমসাগর আম।",
-    slug: "/pineapple-from-kustiya",
-    price: 49.99,
-    category: "pineapple",
-    inStock: false,
-    image:
-      "https://ghorerbazar.com/cdn/shop/files/250tk_discount.jpg?v=1747222020&width=360",
-  },
-  {
-    id: 9,
-    name: "Pomegranate",
-    description:
-      "বাংলাদেশের নির্দেশক বা জিআই পণ্য হিসেবে স্বীকৃতি পেয়েছে চাঁপাইনবাবগঞ্জের হিমসাগর আম। স্বাদে-গন্ধে অতুলনীয় হিমসাগর আম। চাঁপাইনবাবগঞ্জের এই আমের সুনাম রয়েছে দেশ বিদেশে। জিআই সনদ পাওয়ার পর এখন থেকে চাঁপাইনবাবগঞ্জের পণ্য হিসেবেই বাজারজাত হচ্ছে হিমসাগর আম।",
-
-    price: 39.99,
-    category: "pomegranate",
-    inStock: false,
-    slug: "/pomegranate-form-joshor",
-    image:
-      "https://images.unsplash.com/photo-1608869857121-c0bcdf4fff2c?q=80&w=500&auto=format&fit=crop",
-  },
-];
-
-const categories = ["mango", "pomegranate", "pineapple"];
+import api from "@/axios/interceptor";
+import { handleAxiosError } from "@/utils/error";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { IProduct } from "@/interfaces/products";
+import { ICategory } from "@/interfaces/categories";
 
 export default function ProductPage() {
+  const [products, setProducts] = useState<IProduct[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
   const [pagination, setPagination] = useState<Pagination>(defaultPagination);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(
+    null
+  );
   const [stockFilter, setStockFilter] = useState<
-    "all" | "in-stock" | "out-of-stock"
+    "all" | "inStock" | "outOfStock" | "lowStock"
   >("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const handleCategoryChange = (category: string, checked: boolean) => {
+  const searchParams = useSearchParams();
+  const categorySlug = searchParams.get("category");
+
+  useEffect(() => {
+    setSelectedCategory(
+      categories.find((category) => category.slug === categorySlug) || null
+    );
+  }, [categorySlug, categories]);
+
+  // Fetch products and categories on component mount
+  const fetchProducts = async ({
+    page = 1,
+    categoryFilter,
+    stockFilter = "all",
+    limit = 9,
+  }: {
+    page: number;
+    categoryFilter?: string;
+    stockFilter?: "all" | "lowStock" | "inStock" | "outOfStock";
+    limit?: number;
+  }) => {
+    try {
+      const response = await api.get("/products", {
+        params: {
+          page,
+          ...(categoryFilter !== "all" && {
+            category: categoryFilter,
+          }),
+          ...(stockFilter !== "all" && { status: stockFilter }),
+          ...(limit && { limit }),
+        },
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error.message || "Something with wrong!");
+      }
+
+      setProducts(response.data.data);
+
+      setPagination(() => ({
+        page: response.data.pagination.page,
+        total: response.data.pagination.total,
+        totalPages: response.data.pagination.totalPages,
+        nextPage: response.data.pagination.nextPage || null,
+        prevPage: response.data.pagination.prevPage || null,
+      }));
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  };
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    // Fetch categories on component mount
+    const getCategorires = async ({
+      queryParams,
+    }: {
+      queryParams: Record<string, any>;
+    }) => {
+      try {
+        const response = await api.get("/categories", {
+          params: { ...queryParams },
+        });
+
+        if (!response.data.success) {
+          throw new Error(
+            response.data.error.message || "Something with wrong!"
+          );
+        }
+
+        setCategories(response.data.data);
+      } catch (error) {
+        handleAxiosError(error);
+      }
+    };
+
+    getCategorires({ queryParams: { limit: 1000, sortType: "asc" } });
+  }, []);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchProducts({
+      page: pagination.page,
+      categoryFilter: selectedCategory?._id || "all",
+      stockFilter: stockFilter || "all",
+    });
+  }, [selectedCategory, stockFilter, pagination.page]);
+
+  const handleCategoryChange = (category: ICategory, checked: boolean) => {
     if (checked) {
-      setSelectedCategories([...selectedCategories, category]);
+      setSelectedCategory(category);
     } else {
-      setSelectedCategories(selectedCategories.filter((c) => c !== category));
+      setSelectedCategory(null);
     }
   };
 
   const handleStockFilterChange = (
-    filter: "all" | "in-stock" | "out-of-stock"
+    filter: "all" | "inStock" | "outOfStock" | "lowStock"
   ) => {
     setStockFilter(filter);
   };
 
   const clearFilters = () => {
-    setSelectedCategories([]);
+    setSelectedCategory(null);
     setStockFilter("all");
   };
-
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const categoryMatch =
-        selectedCategories.length === 0 ||
-        selectedCategories.includes(product.category);
-      const stockMatch =
-        stockFilter === "all" ||
-        (stockFilter === "in-stock" && product.inStock) ||
-        (stockFilter === "out-of-stock" && !product.inStock);
-
-      return categoryMatch && stockMatch;
-    });
-  }, [selectedCategories, stockFilter]);
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -217,19 +167,23 @@ export default function ProductPage() {
           <AccordionContent>
             <div className="space-y-3">
               {categories.map((category) => (
-                <div key={category} className="flex items-center space-x-2">
+                <div key={category._id} className="flex items-center space-x-2">
                   <Checkbox
-                    id={category}
-                    checked={selectedCategories.includes(category)}
+                    id={category._id}
+                    checked={
+                      (selectedCategory &&
+                        selectedCategory._id === category._id) ||
+                      false
+                    }
                     onCheckedChange={(checked) =>
                       handleCategoryChange(category, checked as boolean)
                     }
                   />
                   <Label
-                    htmlFor={category}
+                    htmlFor={category._id}
                     className="text-sm font-normal cursor-pointer capitalize"
                   >
-                    {category}
+                    {category.name}
                   </Label>
                 </div>
               ))}
@@ -259,8 +213,8 @@ export default function ProductPage() {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="in-stock"
-                  checked={stockFilter === "in-stock"}
-                  onCheckedChange={() => handleStockFilterChange("in-stock")}
+                  checked={stockFilter === "inStock"}
+                  onCheckedChange={() => handleStockFilterChange("inStock")}
                 />
                 <Label
                   htmlFor="in-stock"
@@ -271,11 +225,22 @@ export default function ProductPage() {
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
+                  id="low-stock"
+                  checked={stockFilter === "lowStock"}
+                  onCheckedChange={() => handleStockFilterChange("lowStock")}
+                />
+                <Label
+                  htmlFor="low-stock"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Low Stock
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
                   id="out-of-stock"
-                  checked={stockFilter === "out-of-stock"}
-                  onCheckedChange={() =>
-                    handleStockFilterChange("out-of-stock")
-                  }
+                  checked={stockFilter === "outOfStock"}
+                  onCheckedChange={() => handleStockFilterChange("outOfStock")}
                 />
                 <Label
                   htmlFor="out-of-stock"
@@ -291,27 +256,29 @@ export default function ProductPage() {
     </div>
   );
 
-  const ProductCard = ({ product }: { product: Product }) => (
+  const ProductCard = ({ product }: { product: IProduct }) => (
     <Card className="group hover:shadow-lg transition-shadow duration-200">
       <CardContent
         className={`${viewMode !== "grid" && "grid grid-cols-3 gap-8"}`}
       >
-        <div className={`${viewMode !== "grid" ? "" : "mb-4"}"relative"`}>
-          <Image
-            src={product.image || "/placeholder.svg"}
-            alt={product.name}
-            width={300}
-            height={300}
-            className="w-full h-48 object-cover rounded-md group-hover:scale-105 transition-transform duration-200"
-          />
-          {!product.inStock && (
-            <Badge variant="secondary" className="absolute top-2 right-2">
+        <div className={`${viewMode !== "grid" ? "" : "mb-4"} relative`}>
+          <Link href={`/products/${product.slug}`}>
+            <Image
+              src={product.media[0].url || ""}
+              alt={product.name}
+              width={300}
+              height={300}
+              className="w-full h-48 object-cover rounded-md group-hover:scale-105 transition-transform duration-200"
+            />
+          </Link>
+          {product.status === "outOfStock" && (
+            <Badge variant="secondary" className="absolute top-2 right-2 z-10">
               Out of Stock
             </Badge>
           )}
-          {product.originalPrice && (
+          {product.isPopular && (
             <Badge variant="destructive" className="absolute top-2 left-2">
-              Sale
+              Popular
             </Badge>
           )}
         </div>
@@ -320,22 +287,26 @@ export default function ProductPage() {
         >
           <h3 className="font-semibold text-lg line-clamp-2">{product.name}</h3>
           <p className="text-sm text-muted-foreground line-clamp-3">
-            {product.description}
+            {product.shortDescription ||
+              product.longDescription ||
+              "No description available for this product."}
           </p>
           <div className="flex items-center space-x-2">
-            <span className="text-xl font-bold">${product.price}</span>
-            {product.originalPrice && (
+            <span className="text-xl font-bold">
+              {product.unit.price || product.unit.originalPrice}
+            </span>
+            {product.unit.price < product.unit.originalPrice && (
               <span className="text-sm text-muted-foreground line-through">
-                ${product.originalPrice}
+                {product.unit.originalPrice}
               </span>
             )}
           </div>
           <Button
             className="w-full mt-2 cursor-pointer"
-            disabled={!product.inStock}
-            variant={product.inStock ? "default" : "secondary"}
+            disabled={product.status === "outOfStock"}
+            variant={product.status !== "outOfStock" ? "default" : "secondary"}
           >
-            {product.inStock ? "Add to Cart" : "Out of Stock"}
+            {product.status !== "outOfStock" ? "Add to Cart" : "Out of Stock"}
           </Button>
         </div>
       </CardContent>
@@ -359,7 +330,7 @@ export default function ProductPage() {
             <div>
               <h1 className="text-3xl font-bold mb-2">Products</h1>
               <p className="text-muted-foreground">
-                Showing {filteredProducts.length} of {products.length} products
+                Showing {products.length} of {pagination.total} products
               </p>
             </div>
 
@@ -408,22 +379,32 @@ export default function ProductPage() {
           </div>
 
           {/* Active Filters */}
-          {(selectedCategories.length > 0 || stockFilter !== "all") && (
+          {(selectedCategory !== null || stockFilter !== "all") && (
             <div className="flex flex-wrap gap-2 mb-6">
-              {selectedCategories.map((category) => (
-                <Badge key={category} variant="secondary" className="px-3 py-1">
-                  {category}
+              {selectedCategory && (
+                <Badge
+                  key={selectedCategory.name.toLowerCase()}
+                  variant="secondary"
+                  className="px-3 py-1"
+                >
+                  {selectedCategory.name}
                   <button
-                    onClick={() => handleCategoryChange(category, false)}
+                    onClick={() =>
+                      handleCategoryChange(selectedCategory, false)
+                    }
                     className="ml-2 hover:text-destructive"
                   >
                     <X className="w-4 h-4 cursor-pointer" />
                   </button>
                 </Badge>
-              ))}
+              )}
               {stockFilter !== "all" && (
                 <Badge variant="secondary" className="px-3 py-1">
-                  {stockFilter === "in-stock" ? "In Stock" : "Out of Stock"}
+                  {stockFilter === "inStock"
+                    ? "In Stock"
+                    : stockFilter === "lowStock"
+                    ? "Low Stock"
+                    : "Out of Stock"}
                   <button
                     onClick={() => handleStockFilterChange("all")}
                     className="ml-2 hover:text-destructive"
@@ -436,7 +417,7 @@ export default function ProductPage() {
           )}
 
           {/* Products Grid */}
-          {filteredProducts.length > 0 ? (
+          {products.length > 0 ? (
             <div
               className={
                 viewMode === "grid"
@@ -444,8 +425,8 @@ export default function ProductPage() {
                   : "space-y-4"
               }
             >
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {products.map((product) => (
+                <ProductCard key={product._id} product={product} />
               ))}
             </div>
           ) : (
