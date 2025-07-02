@@ -34,6 +34,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import useMe from "@/hooks/auth/useMe";
 
 export default function AdminLayout({
   children,
@@ -49,6 +50,7 @@ export default function AdminLayout({
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { isMobile, setOpenMobile } = useSidebar();
+  const { user, handleLogout } = useMe();
 
   return (
     <>
@@ -90,8 +92,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                   className="relative h-8 w-8 rounded-full cursor-pointer"
                 >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={""} alt="User" />
-                    <AvatarFallback>SG</AvatarFallback>
+                    <AvatarImage src={""} alt={user?.name || "User"} />
+                    <AvatarFallback>
+                      {user?.name.charAt(0) || "SG"}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -99,10 +103,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {"Shuddhoghor"}
+                      {user?.name || "Shuddhoghor"}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {"info@shuddhoghor.com"}
+                      {user?.email || "info@shuddhoghor.com"}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -141,7 +145,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                       <AlertDialogCancel className="cursor-pointer">
                         Cancel
                       </AlertDialogCancel>
-                      <AlertDialogAction className="cursor-pointer">
+                      <AlertDialogAction
+                        onClick={handleLogout}
+                        className="cursor-pointer"
+                      >
                         Continue
                       </AlertDialogAction>
                     </AlertDialogFooter>

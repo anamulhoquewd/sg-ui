@@ -36,14 +36,14 @@ const categoryFormSchema = z.object({
   category: z.string().min(1, "Please select a category"),
 });
 
-type CategoryFormValues = z.infer<typeof categoryFormSchema>;
+type FormValues = z.infer<typeof categoryFormSchema>;
 
-interface CategoryDialogProps {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: any;
   categories: { _id: string; name: string }[];
-  onUpdate: (data: CategoryFormValues) => void;
+  onUpdate: (data: FormValues) => void;
 }
 
 export function CategoryDialog({
@@ -52,22 +52,32 @@ export function CategoryDialog({
   product,
   categories,
   onUpdate,
-}: CategoryDialogProps) {
+}: Props) {
   const [isPending, setIsPending] = useState(false);
 
-  const form = useForm<CategoryFormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       category: product?.category._id || "",
     },
   });
 
-  const onSubmit = async (data: CategoryFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     setIsPending(true);
     try {
       onUpdate(data);
-    } catch (error) {
+
+      form.reset({ category: "" });
+    } catch (error: any) {
       console.error("Error updating category:", error);
+
+      if (error.response.data.success === false) {
+        error.response.data.fields.forEach((field: any) => {
+          form.setError(field.name, {
+            message: field.message,
+          });
+        });
+      }
     } finally {
       setIsPending(false);
     }

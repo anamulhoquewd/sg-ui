@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Upload, Trash2, Check, X } from "lucide-react";
 
@@ -19,25 +19,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { IMedia } from "@/interfaces/products";
 
-interface MediaDialogProps {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: any;
   onUpdate: (data: any) => void;
 }
 
-export function MediaDialog({
-  open,
-  onOpenChange,
-  product,
-  onUpdate,
-}: MediaDialogProps) {
+export function MediaDialog({ open, onOpenChange, product, onUpdate }: Props) {
   const [isPending, setIsPending] = useState(false);
-  const [currentMedia, setCurrentMedia] = useState<File[]>(
-    product?.media || []
-  );
-  const [mediaToDelete, setMediaToDelete] = useState<File[]>([]);
+  const [currentMedia, setCurrentMedia] = useState<IMedia[]>([]);
+  const [mediaToDelete, setMediaToDelete] = useState<IMedia[]>([]);
 
   const [newImages, setNewImages] = useState<{ url: string; file: File }[]>([]);
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
@@ -82,6 +76,10 @@ export function MediaDialog({
   const removeNewImage = (index: number) => {
     setNewImages((prev) => prev.filter((_, i) => i !== index));
   };
+
+  useEffect(() => {
+    setCurrentMedia(product.media);
+  }, [product]);
 
   // On submit
   const handleSubmit = async () => {

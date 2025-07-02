@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -102,10 +102,8 @@ export default function StatusDialog({
   order,
   onUpdate,
 }: StatusDialogProps) {
-  const [status, setStatus] = useState(order?.status || "pending");
-  const [paymentStatus, setPaymentStatus] = useState(
-    order?.paymentStatus || "pending"
-  );
+  const [status, setStatus] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState("");
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -127,6 +125,11 @@ export default function StatusDialog({
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    setStatus(order?.status || "");
+    setPaymentStatus(order.paymentStatus || "");
+  }, [order]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

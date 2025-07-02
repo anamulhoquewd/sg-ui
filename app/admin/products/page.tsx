@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -56,250 +55,36 @@ import { CategoryDialog } from "./_components/category-dialog";
 import { VisibilityDialog } from "./_components/visibility-dialog";
 import { MediaDialog } from "./_components/media-dialog";
 import { Progress } from "@/components/ui/progress";
-import api from "@/axios/interceptor";
 import Paginations from "@/components/pagination";
-import { defaultPagination } from "@/utils/details";
-import { handleAxiosError } from "@/utils/error";
-import { toast } from "sonner";
-import { DeleteDialog } from "./_components/delete-dialong";
-import { ca } from "date-fns/locale";
-import { Product } from "@/components/product-page";
-
-export interface Pagination {
-  page: number;
-  total: number;
-  totalPages: number;
-  nextPage: number | null;
-  prevPage: number | null;
-}
+import { DeleteDialog } from "../_components/delete-dialong";
+import { IProduct } from "@/interfaces/products";
+import useProduct from "./_hook/useProduct";
+import useCategory from "../categories/_hook/useCategory";
 
 export default function ProductsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [pagination, setPagination] = useState<Pagination>(defaultPagination);
-
-  // Dialog states
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [unitDialogOpen, setUnitDialogOpen] = useState(false);
-  const [generalDialogOpen, setGeneralDialogOpen] = useState(false);
-  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
-  const [visibilityDialogOpen, setVisibilityDialogOpen] = useState(false);
-  const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  // Fetch products
-  const getProducts = async ({
-    searchQuery,
-    page = 1,
-    categoryFilter,
-  }: {
-    searchQuery: string;
-    page: number;
-    categoryFilter: string;
-  }) => {
-    try {
-      const response = await api.get("/products", {
-        params: {
-          search: searchQuery,
-          page,
-          ...(categoryFilter !== "all" && {
-            category: categoryFilter,
-          }),
-        },
-      });
-
-      if (!response.data.success) {
-        throw new Error(response.data.error.message || "Something with wrong!");
-      }
-
-      setProducts(response.data.data);
-
-      setPagination(() => ({
-        page: response.data.pagination.page,
-        total: response.data.pagination.total,
-        totalPages: response.data.pagination.totalPages,
-        nextPage: response.data.pagination.nextPage || null,
-        prevPage: response.data.pagination.prevPage || null,
-      }));
-    } catch (error) {
-      handleAxiosError(error);
-    }
-  };
-
-  useEffect(() => {
-    // Fetch categories
-    const getCategorires = async () => {
-      try {
-        const response = await api.get("/categories", {
-          params: { limit: 1000 },
-        });
-
-        if (!response.data.success) {
-          throw new Error(
-            response.data.error.message || "Something with wrong!"
-          );
-        }
-
-        setCategories(response.data.data);
-      } catch (error) {
-        handleAxiosError(error);
-      }
-    };
-
-    getCategorires();
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchQuery(search);
-      setPagination((prev) => ({ ...prev, page: 1 }));
-    }, 1000);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [search]);
-
-  useEffect(() => {
-    getProducts({ page: pagination.page, searchQuery, categoryFilter });
-  }, [pagination.page, searchQuery, categoryFilter]);
-
   const openDialog = (product: any, dialogType: string) => {
-    setSelectedProduct(product);
+    setSelectedItem(product);
     switch (dialogType) {
       case "unit":
-        setUnitDialogOpen(true);
+        setUnitOpen(true);
         break;
       case "general":
-        setGeneralDialogOpen(true);
+        setGeneralOpen(true);
         break;
       case "category":
-        setCategoryDialogOpen(true);
+        setCategoryOpen(true);
         break;
       case "visibility":
-        setVisibilityDialogOpen(true);
+        setVisibilityOpen(true);
         break;
       case "media":
-        setMediaDialogOpen(true);
+        setMediaOpen(true);
         break;
       case "delete":
-        setDeleteDialogOpen(true);
+        setDeleteOpen(true);
         break;
       default:
         console.error("Unknown dialog type:", dialogType);
-    }
-  };
-
-  const handleDeleteProduct = async (id: string) => {
-    try {
-      const response = await api.delete(`/products/${id}`);
-
-      if (!response.data.success) {
-        throw new Error(response.data.error.message || "Something with wrong!");
-      }
-
-      toast(response?.data?.message || "Product deleted successfully!");
-      getProducts({ page: pagination.page, searchQuery, categoryFilter });
-    } catch (error) {
-      handleAxiosError(error);
-    }
-  };
-
-  const handleUpdateProduct = async (data: any, type: string) => {
-    console.log(`Updating ${type} for product ${selectedProduct._id}:`, data);
-    // Here you would make an API call to update the product
-    // After successful update, you would refresh the product list
-
-    try {
-      if (type === "media") {
-        if (data.mediaToDelete.length > 0) {
-          const response = await api.delete(
-            `/products/${selectedProduct._id}/${type}`,
-            { data: { urls: data.mediaToDelete } }
-          );
-
-          toast(
-            response?.data?.message || "Product media delete is successful!"
-          );
-        }
-
-        if (data.newMedia.length > 0) {
-          const formData = new FormData();
-
-          // Append images
-          data.newMedia.forEach((media: any) => {
-            if (media.file) {
-              formData.append("media", media.file);
-            }
-          });
-
-          const urlsResponse = await api.post(`/products/media`, formData, {
-            params: { slug: selectedProduct.slug },
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-
-          if (!urlsResponse.data.success) {
-            throw new Error(
-              urlsResponse.data.error.message || "Something with wrong!"
-            );
-          }
-
-          const updateResponse = await api.patch(
-            `/products/${selectedProduct._id}/media`,
-            {
-              urls: urlsResponse.data.data,
-            }
-          );
-
-          if (!updateResponse.data.success) {
-            throw new Error(
-              updateResponse.data.error.message || "Something with wrong!"
-            );
-          }
-
-          toast(
-            urlsResponse?.data?.message || "Product media posted successful!"
-          );
-          toast(updateResponse?.data?.message || "Product updated successful!");
-        }
-      } else {
-        const response = await api.patch(
-          `/products/${selectedProduct._id}/${type}`,
-          data
-        );
-
-        toast(response?.data?.message || "Product media delete is successful!");
-      }
-      getProducts({ page: pagination.page, searchQuery, categoryFilter });
-    } catch (error) {
-      handleAxiosError(error);
-    } finally {
-      // Close the dialog
-      switch (type) {
-        case "unit":
-          setUnitDialogOpen(false);
-          break;
-        case "general":
-          setGeneralDialogOpen(false);
-          break;
-        case "category":
-          setCategoryDialogOpen(false);
-          break;
-        case "visibility":
-          setVisibilityDialogOpen(false);
-          break;
-        case "media":
-          setMediaDialogOpen(false);
-          break;
-        case "delete":
-          setDeleteDialogOpen(false);
-          break;
-      }
     }
   };
 
@@ -329,16 +114,33 @@ export default function ProductsPage() {
     }
   };
 
-  const formatPrice = (price: number) => {
-    return `${price.toLocaleString()}`;
-  };
-
-  const getStockPercentage = (product: any) => {
-    // Calculate percentage based on a reasonable maximum (e.g., 5x the low stock threshold)
-    const maxExpected = product.lowStockThreshold * 5;
-    const percentage = (product.unit.stockQuantity / maxExpected) * 100;
-    return Math.min(percentage, 100); // Cap at 100%
-  };
+  const { categories } = useCategory();
+  const {
+    getStockPercentage,
+    unitOpen,
+    setUnitOpen,
+    generalOpen,
+    setGeneralOpen,
+    deleteOpen,
+    setDeleteOpen,
+    categoryOpen,
+    setCategoryOpen,
+    visibilityOpen,
+    setVisibilityOpen,
+    mediaOpen,
+    setMediaOpen,
+    selectedItem,
+    setSelectedItem,
+    pagination,
+    setPagination,
+    search,
+    setSearch,
+    categoryFilter,
+    setCategoryFilter,
+    products,
+    handleDelete,
+    handleUpdate,
+  } = useProduct();
 
   return (
     <div className="space-y-6">
@@ -420,7 +222,7 @@ export default function ProductsPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  products.map((product: Product) => {
+                  products.map((product: IProduct) => {
                     // Image
                     const mediaUrl =
                       product.media[0]?.url ||
@@ -453,7 +255,7 @@ export default function ProductsPage() {
                         </TableCell>
                         <TableCell>{product?.category.name}</TableCell>
                         <TableCell className="text-right">
-                          <div>{formatPrice(product.unit.price)}</div>
+                          <div>{product.unit.price.toLocaleString()}</div>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className=" space-y-1.5">
@@ -595,47 +397,47 @@ export default function ProductsPage() {
       </Card>
 
       {/* Dialogs for updating different parts of the product */}
-      {selectedProduct && (
+      {selectedItem && (
         <>
           <UnitDialog
-            open={unitDialogOpen}
-            onOpenChange={setUnitDialogOpen}
-            product={selectedProduct}
-            onUpdate={(data) => handleUpdateProduct(data, "unit")}
+            open={unitOpen}
+            onOpenChange={setUnitOpen}
+            product={selectedItem}
+            onUpdate={(data) => handleUpdate(data, "unit")}
           />
 
           <GeneralDialog
-            open={generalDialogOpen}
-            onOpenChange={setGeneralDialogOpen}
-            product={selectedProduct}
-            onUpdate={(data) => handleUpdateProduct(data, "general")}
+            open={generalOpen}
+            onOpenChange={setGeneralOpen}
+            product={selectedItem}
+            onUpdate={(data) => handleUpdate(data, "general")}
           />
 
           <CategoryDialog
-            open={categoryDialogOpen}
-            onOpenChange={setCategoryDialogOpen}
-            product={selectedProduct}
+            open={categoryOpen}
+            onOpenChange={setCategoryOpen}
+            product={selectedItem}
             categories={categories}
-            onUpdate={(data) => handleUpdateProduct(data, "category")}
+            onUpdate={(data) => handleUpdate(data, "category")}
           />
 
           <VisibilityDialog
-            open={visibilityDialogOpen}
-            onOpenChange={setVisibilityDialogOpen}
-            product={selectedProduct}
-            onUpdate={(data) => handleUpdateProduct(data, "visibility")}
+            open={visibilityOpen}
+            onOpenChange={setVisibilityOpen}
+            product={selectedItem}
+            onUpdate={(data) => handleUpdate(data, "visibility")}
           />
 
           <MediaDialog
-            open={mediaDialogOpen}
-            onOpenChange={setMediaDialogOpen}
-            product={selectedProduct}
-            onUpdate={(data) => handleUpdateProduct(data, "media")}
+            open={mediaOpen}
+            onOpenChange={setMediaOpen}
+            product={selectedItem}
+            onUpdate={(data) => handleUpdate(data, "media")}
           />
           <DeleteDialog
-            onConfirm={() => handleDeleteProduct(selectedProduct._id)}
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
+            onConfirm={() => handleDelete(selectedItem._id)}
+            open={deleteOpen}
+            changeOpen={setDeleteOpen}
           />
         </>
       )}

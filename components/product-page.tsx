@@ -264,8 +264,8 @@ export default function ProductPage() {
         <div className={`${viewMode !== "grid" ? "" : "mb-4"} relative`}>
           <Link href={`/products/${product.slug}`}>
             <Image
-              src={product.media[0].url || ""}
-              alt={product.name}
+              src={product.media[0]?.url || ""}
+              alt={product.media[0]?.alt || product.name}
               width={300}
               height={300}
               className="w-full h-48 object-cover rounded-md group-hover:scale-105 transition-transform duration-200"

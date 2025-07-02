@@ -22,6 +22,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 
@@ -30,13 +31,13 @@ const visibilityFormSchema = z.object({
   isPopular: z.boolean(),
 });
 
-type VisibilityFormValues = z.infer<typeof visibilityFormSchema>;
+type FormValues = z.infer<typeof visibilityFormSchema>;
 
-interface VisibilityDialogProps {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: any;
-  onUpdate: (data: VisibilityFormValues) => void;
+  onUpdate: (data: FormValues) => void;
 }
 
 export function VisibilityDialog({
@@ -44,10 +45,10 @@ export function VisibilityDialog({
   onOpenChange,
   product,
   onUpdate,
-}: VisibilityDialogProps) {
+}: Props) {
   const [isPending, setIsPending] = useState(false);
 
-  const form = useForm<VisibilityFormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(visibilityFormSchema),
     defaultValues: {
       visibility: product?.visibility || false,
@@ -55,12 +56,20 @@ export function VisibilityDialog({
     },
   });
 
-  const onSubmit = async (data: VisibilityFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     setIsPending(true);
     try {
       onUpdate(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating visibility settings:", error);
+
+      if (error.response.data.success === false) {
+        error.response.data.fields.forEach((field: any) => {
+          form.setError(field.name, {
+            message: field.message,
+          });
+        });
+      }
     } finally {
       setIsPending(false);
     }

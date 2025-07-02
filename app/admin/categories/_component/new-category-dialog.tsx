@@ -1,10 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { ListIcon as Category } from "lucide-react";
+import { ListIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,72 +22,48 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FormValues } from "../_hook/useCategory";
 
-const categoryFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  slug: z.string().min(1, "Slug is required"),
-  description: z.string().optional(),
-});
-
-type CategoryFormValues = z.infer<typeof categoryFormSchema>;
-
-interface CategoryDialogProps {
+interface Props {
+  form: any;
+  onSubmit: (data: FormValues) => void;
+  isLoading: boolean;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (data: CategoryFormValues) => void;
+  changeOpen: (open: boolean) => void;
 }
 
 export default function NewCategory({
-  open,
-  onOpenChange,
+  form,
   onSubmit,
-}: CategoryDialogProps) {
-  const [isPending, setIsPending] = useState(false);
-  const form = useForm<CategoryFormValues>({
-    resolver: zodResolver(categoryFormSchema),
-    defaultValues: {
-      name: "",
-      slug: "",
-      description: "",
-    },
-  });
-
-  const firstSubmit = async (data: CategoryFormValues) => {
-    setIsPending(true);
-    try {
-      onSubmit(data);
-      // Reset form after submission
-      form.reset();
-    } catch (error) {
-      console.error("Error updating category:", error);
-    } finally {
-      setIsPending(false);
-    }
-  };
-
+  isLoading,
+  open,
+  changeOpen,
+}: Props) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={changeOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Category className="h-5 w-5" />
+            <ListIcon className="h-5 w-5" />
             New Category
           </DialogTitle>
           <DialogDescription>Create a new category.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(firstSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="cursor-pointer">Product Name</FormLabel>
+                  <FormLabel className="cursor-pointer">
+                    category Name
+                  </FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="Type name" {...field} />
                   </FormControl>
                   <FormDescription>
-                    The name displayed in product listings
+                    The name displayed in category listings
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -102,9 +74,11 @@ export default function NewCategory({
               name="slug"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="cursor-pointer">Product Slug</FormLabel>
+                  <FormLabel className="cursor-pointer">
+                    Category Slug
+                  </FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="Type slug" {...field} />
                   </FormControl>
                   <FormDescription>
                     The unique identifier for the category
@@ -140,12 +114,12 @@ export default function NewCategory({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={() => changeOpen(false)}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Creating..." : "Create Category"}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Creating..." : "Create Category"}
               </Button>
             </DialogFooter>
           </form>

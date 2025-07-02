@@ -8,10 +8,7 @@ import {
   MoreHorizontal,
   Eye,
   Download,
-  CheckCircle,
-  Clock,
   Truck,
-  XCircle,
   Package,
   X,
   Calendar,
@@ -21,7 +18,6 @@ import {
   CreditCard,
   Trash2,
 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -55,7 +51,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Popover,
   PopoverContent,
@@ -75,7 +71,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DateRangePicker } from "@/components/date-range-picker";
-import DeleteDialog from "./_components/delete-dialog";
 import ItemsDialog from "./_components/items-dialog";
 import AdjustmentDialog from "./_components/adjustment-dialog";
 import StatusDialog, {
@@ -85,269 +80,64 @@ import StatusDialog, {
 } from "./_components/status-dialog";
 import { IOrder } from "@/interfaces/orders";
 import ShowItems from "./_components/show-items";
+import { DeleteDialog } from "../_components/delete-dialong";
+import useOrder from "./_hook/useOrder";
 
 export default function OrdersPage() {
-  // Define the range for the amount filter
-  const minRange = 0;
-  const maxRange = 10000;
-
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [statusesDialogOpen, setStatusesDialogOpen] = useState(false);
-  const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
-  const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [showItemsDialogOpen, setShowItemsDialogOpen] = useState(false);
-
-  const [search, setSearch] = useState({
-    orderId: "",
-    customerId: "",
-    productId: "",
-  });
-  const [debouncedOrderId, setDebouncedOrderId] = useState("");
-  const [debouncedCustomerId, setDebouncedCustomerId] = useState("");
-  const [debouncedProductId, setDebouncedProductId] = useState("");
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [orders, setOrders] = useState<IOrder[]>([]); // Initialize with sample data
-  const [pagination, setPagination] = useState<Pagination>(defaultPagination);
-  const [filterBy, setFilterBy] = useState<{
-    status: string;
-    paymentStatus: string;
-    dateRange: { from: Date | undefined; to: Date | undefined } | undefined;
-    singleDate: Date | undefined;
-    amountRange: [number, number] | number[];
-  }>({
-    status: "",
-    paymentStatus: "",
-    dateRange: undefined as
-      | { from: Date | undefined; to: Date | undefined }
-      | undefined,
-    singleDate: undefined as Date | undefined,
-    amountRange: [minRange, maxRange] as [number, number],
-  });
-
-  const [debouncedAmountRange, setDebouncedAmountRange] = useState<
-    [number, number]
-  >([0, 10000]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedAmountRange(filterBy.amountRange as [number, number]);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [filterBy.amountRange]);
-
-  const loadOrders = async ({
-    search,
-    filters,
-    page,
-  }: {
-    search: {
-      orderId: string;
-      customerId: string;
-      productId: string;
-    };
-    filters: typeof filterBy;
-    page: number;
-  }) => {
-    try {
-      const response = await api.get("/orders", {
-        params: {
-          search: search?.orderId || undefined,
-          status: filters?.status || undefined,
-          paymentStatus: filters?.paymentStatus || undefined,
-          fromDate: filters?.dateRange?.from
-            ? format(filters.dateRange.from, "yyyy-MM-dd")
-            : undefined,
-          toDate: filters?.dateRange?.to
-            ? format(filters.dateRange.to, "yyyy-MM-dd")
-            : undefined,
-          date: filters?.singleDate
-            ? format(filters.singleDate, "yyyy-MM-dd")
-            : undefined,
-          customer: search?.customerId || undefined,
-          product: search?.productId || undefined,
-          minAmount:
-            filters?.amountRange[0] !== minRange
-              ? filters?.amountRange[0]
-              : undefined,
-          maxAmount:
-            filters?.amountRange[0] !== minRange
-              ? filters?.amountRange[1]
-              : undefined,
-          page: page === 1 ? undefined : page,
-        },
-      });
-
-      if (!response.data.success || !Array.isArray(response.data.data)) {
-        throw new Error("Invalid response data format");
-      }
-
-      setOrders(response.data.data || []);
-
-      setPagination(() => ({
-        page: response.data.pagination.page,
-        total: response.data.pagination.total,
-        totalPages: response.data.pagination.totalPages,
-        nextPage: response.data.pagination.nextPage || null,
-        prevPage: response.data.pagination.prevPage || null,
-      }));
-    } catch (error) {
-      console.error("Failed to fetch orders:", error);
-    }
-  };
-
-  const clearAllFilters = () => {
-    setFilterBy({
-      status: "",
-      paymentStatus: "",
-      dateRange: { from: undefined, to: undefined },
-      singleDate: undefined,
-      amountRange: [minRange, maxRange] as [number, number],
-    });
-    setSearch({
-      orderId: "",
-      customerId: "",
-      productId: "",
-    });
-  };
-
-  const getActiveFiltersCount = () => {
-    let count = 0;
-    if (filterBy.status) count++;
-    if (filterBy.paymentStatus) count++;
-    if (filterBy.dateRange?.from && filterBy.dateRange?.to) count++;
-    if (filterBy.singleDate) count++;
-    if (debouncedOrderId) count++;
-    if (debouncedCustomerId) count++;
-    if (debouncedProductId) count++;
-    if (
-      filterBy.amountRange[0] !== minRange ||
-      filterBy.amountRange[1] !== maxRange
-    )
-      count++;
-    return count;
-  };
-
   // Function to copy the access key to clipboard
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
 
+  const {
+    setShowAdvancedFilters,
+    statusOpen,
+    setStatusOpen,
+    itemsOpen,
+    setItemsOpen,
+    setAdjustmentOpen,
+    adjustmentOpen,
+    setDeleteOpen,
+    deleteOpen,
+    showAdvancedFilters,
+    selectedItem,
+    setSelectedItem,
+    setShowItemsOpen,
+    showItemsOpen,
+    pagination,
+    setPagination,
+    search,
+    setSearch,
+    filterBy,
+    setFilterBy,
+    getActiveFiltersCount,
+    clearAllFilters,
+    minRange,
+    maxRange,
+    orders,
+    handleDelete,
+    handleUpdate,
+  } = useOrder();
+
   const openDialog = (order: IOrder, dialogType: string) => {
-    setSelectedOrder(order);
+    setSelectedItem(order);
     switch (dialogType) {
-      case "statuses":
-        setStatusesDialogOpen(true);
+      case "status":
+        setStatusOpen(true);
         break;
       case "adjustment":
-        setAdjustmentDialogOpen(true);
+        setAdjustmentOpen(true);
         break;
       case "items":
-        setItemsDialogOpen(true);
+        setItemsOpen(true);
         break;
       case "delete":
-        setDeleteDialogOpen(true);
+        setDeleteOpen(true);
         break;
       default:
         console.error("Unknown dialog type:", dialogType);
     }
   };
-
-  const handleUpdateOrder = async (data: any, type: string) => {
-    console.log("Update Product Data:", data, type);
-
-    if (!selectedOrder) {
-      return;
-    }
-
-    try {
-      const response = await api.patch(
-        `/orders/${selectedOrder._id}/${type}`,
-        data
-      );
-
-      if (!response.data.success) {
-        throw new Error("Failed to update order");
-      }
-
-      // Update the local state with the new order data
-      loadOrders({
-        search: {
-          orderId: debouncedOrderId,
-          customerId: debouncedCustomerId,
-          productId: debouncedProductId,
-        },
-        filters: filterBy,
-        page: pagination.page,
-      });
-    } catch (error) {
-      console.error("Failed to update order:", error);
-    } finally {
-      setSelectedOrder(null);
-    }
-  };
-
-  const handleDeleteOrder = async (id: string) => {
-    console.log("Delete Product ID:", id);
-    try {
-      const response = await api.delete(`/orders/${id}`);
-
-      if (!response.data.success) {
-        throw new Error("Failed to delete order");
-      }
-
-      // Reload orders after deletion
-      loadOrders({
-        search: {
-          orderId: debouncedOrderId,
-          customerId: debouncedCustomerId,
-          productId: debouncedProductId,
-        },
-        filters: filterBy,
-        page: pagination.page,
-      });
-
-      setSelectedOrder(null);
-    } catch (error) {
-      console.error("Failed to delete order:", error);
-    }
-  };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedOrderId(search.orderId);
-      setDebouncedCustomerId(search.customerId);
-      setDebouncedProductId(search.productId);
-      setPagination((prev) => ({ ...prev, page: 1 }));
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [search.customerId, search.orderId, search.productId]);
-
-  // Fetch orders on initial load
-  useEffect(() => {
-    loadOrders({
-      search: {
-        orderId: debouncedOrderId,
-        customerId: debouncedCustomerId,
-        productId: debouncedProductId,
-      },
-      filters: filterBy,
-      page: pagination.page,
-    });
-  }, [
-    debouncedOrderId,
-    debouncedCustomerId,
-    debouncedProductId,
-    filterBy.status,
-    filterBy.paymentStatus,
-    filterBy.dateRange,
-    filterBy.singleDate,
-    debouncedAmountRange,
-    pagination.page,
-  ]);
 
   return (
     <div className="space-y-6">
@@ -359,12 +149,6 @@ export default function OrdersPage() {
           <p className="text-muted-foreground">
             You have {pagination.total} total orders.
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" className="cursor-pointer">
-            <Download className="mr-2 h-4 w-4" />
-            Export Orders
-          </Button>
         </div>
       </div>
 
@@ -399,10 +183,10 @@ export default function OrdersPage() {
                 }
               >
                 <SelectTrigger className="w-full md:w-40">
-                  <SelectValue placeholder="All Statuses" />
+                  <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="processing">Processing</SelectItem>
                   <SelectItem value="shipped">Shipped</SelectItem>
@@ -418,10 +202,10 @@ export default function OrdersPage() {
                 }
               >
                 <SelectTrigger className="w-full md:w-40">
-                  <SelectValue placeholder="All Pay Statuses" />
+                  <SelectValue placeholder="All Pay Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Pay Statuses</SelectItem>
+                  <SelectItem value="all">All Pay Status</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="paid">Paid</SelectItem>
                   <SelectItem value="refunded">Refunded</SelectItem>
@@ -640,8 +424,8 @@ export default function OrdersPage() {
                           variant={"outline"}
                           size={"sm"}
                           onClick={() => {
-                            setShowItemsDialogOpen(true);
-                            setSelectedOrder(order);
+                            setShowItemsOpen(true);
+                            setSelectedItem(order);
                           }}
                           className="cursor-pointer"
                         >
@@ -702,10 +486,10 @@ export default function OrdersPage() {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => openDialog(order, "statuses")}
+                              onClick={() => openDialog(order, "status")}
                             >
                               <Truck className="mr-2 h-4 w-4" />
-                              Update Statuses
+                              Update Status
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => openDialog(order, "adjustment")}
@@ -747,37 +531,36 @@ export default function OrdersPage() {
         </CardFooter>
       </Card>
 
-      <ShowItems
-        open={showItemsDialogOpen}
-        onOpenChange={setShowItemsDialogOpen}
-        order={selectedOrder}
-      />
-
-      {selectedOrder && (
+      {selectedItem && (
         <>
+          <ShowItems
+            open={showItemsOpen}
+            onOpenChange={setShowItemsOpen}
+            order={selectedItem}
+          />
           <StatusDialog
-            open={statusesDialogOpen}
-            onOpenChange={setStatusesDialogOpen}
-            order={selectedOrder}
-            onUpdate={(data) => handleUpdateOrder(data, "status")}
+            open={statusOpen}
+            onOpenChange={setStatusOpen}
+            order={selectedItem}
+            onUpdate={(data) => handleUpdate(data, "status")}
           />
           <AdjustmentDialog
-            open={adjustmentDialogOpen}
-            onOpenChange={setAdjustmentDialogOpen}
-            order={selectedOrder}
-            onUpdate={(data) => handleUpdateOrder(data, "adjustment")}
+            open={adjustmentOpen}
+            onOpenChange={setAdjustmentOpen}
+            order={selectedItem}
+            onUpdate={(data) => handleUpdate(data, "adjustment")}
           />
           <ItemsDialog
-            open={itemsDialogOpen}
-            onOpenChange={setItemsDialogOpen}
-            order={selectedOrder}
-            onUpdate={(data) => handleUpdateOrder(data, "items")}
+            open={itemsOpen}
+            onOpenChange={setItemsOpen}
+            order={selectedItem}
+            onUpdate={(data) => handleUpdate(data, "items")}
           />
 
           <DeleteDialog
-            onConfirm={() => handleDeleteOrder(selectedOrder._id)}
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
+            onConfirm={() => handleDelete(selectedItem._id)}
+            open={deleteOpen}
+            changeOpen={setDeleteOpen}
           />
         </>
       )}

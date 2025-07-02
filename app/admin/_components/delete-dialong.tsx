@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import {
   AlertDialog,
@@ -10,26 +8,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 
-interface DeleteDialogProps {
+interface Props {
   onConfirm: () => void;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  changeOpen: (open: boolean) => void;
 }
 
-export function DeleteDialog({
-  onConfirm,
-  open,
-  onOpenChange,
-}: DeleteDialogProps) {
+export function DeleteDialog({ onConfirm, open, changeOpen }: Props) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogTrigger asChild>
-        <Button variant="outline">Show Dialog</Button>
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={changeOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -39,10 +28,15 @@ export function DeleteDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => onOpenChange(false)}>
+          <AlertDialogCancel
+            className="cursor-pointer"
+            onClick={() => changeOpen(false)}
+          >
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Continue</AlertDialogAction>
+          <AlertDialogAction className="cursor-pointer" onClick={onConfirm}>
+            Continue
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -5,6 +5,7 @@ export interface IProduct {
   shortDescription?: string;
   longDescription?: string;
   status: "inStock" | "outOfStock" | "lowStock";
+  lowStockThreshold: number;
   unit: {
     price: number;
     originalPrice: number;
@@ -23,4 +24,9 @@ export interface IProduct {
   origin?: string;
   season?: string;
   media: { url: string; alt: string }[];
+}
+
+export interface IMedia {
+  alt: string;
+  url: string;
 }

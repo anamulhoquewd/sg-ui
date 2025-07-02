@@ -1,6 +1,3 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-
 const useAvatar = () => {
   // upload avatar handler
   const uploadHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {

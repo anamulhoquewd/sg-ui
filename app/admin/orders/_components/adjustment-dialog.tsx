@@ -103,7 +103,7 @@ export default function AdjustmentDialog({
         <DialogHeader>
           <DialogTitle>Apply Order Adjustment</DialogTitle>
           <DialogDescription>
-            Apply a discount, fee, or refund to order {order?.id}
+            Apply a discount, fee, or refund to order {order?._id}
           </DialogDescription>
         </DialogHeader>
 

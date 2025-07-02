@@ -16,6 +16,7 @@ import { Form } from "@/components/ui/form";
 import { PasswordInputField } from "./password-input-field";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import useChangePass from "@/hooks/auth/useChangePass";
 
 interface PasswordChangeModalProps {
   isOpen: boolean;
@@ -23,15 +24,17 @@ interface PasswordChangeModalProps {
 }
 
 function ChangePassword({ isOpen, onClose }: PasswordChangeModalProps) {
-  const form = useForm({});
+  const {
+    form,
+    showCurrentPassword,
+    showNewPassword,
+    showConfirmPassword,
+    onSubmit,
+    setShowCurrentPassword,
+    setShowNewPassword,
+    setShowConfirmPassword,
+  } = useChangePass(onClose);
 
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const onSubmit = (data: any) => {
-    console.log(data);
-  };
   return (
     <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
       <DialogContent className="sm:max-w-[500px]">
@@ -83,11 +86,7 @@ function ChangePassword({ isOpen, onClose }: PasswordChangeModalProps) {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button
-                className="cursor-pointer"
-                type="submit"
-                disabled={false}
-              >
+              <Button className="cursor-pointer" type="submit" disabled={false}>
                 {false ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

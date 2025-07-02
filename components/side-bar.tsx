@@ -21,7 +21,16 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { navigation } from "@/config/navigation";
-import { ChevronRight, LayoutDashboard, SettingsIcon } from "lucide-react";
+import {
+  ChevronRight,
+  CreditCard,
+  LayoutDashboard,
+  ListIcon,
+  Package,
+  SettingsIcon,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 
 export function AppSidebar({ className }: { className?: string }) {
@@ -38,6 +47,54 @@ export function AppSidebar({ className }: { className?: string }) {
                 <Link href="/admin">
                   <LayoutDashboard />
                   <span>Dashboard</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/products">
+                  <Package />
+                  <span>Products</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/categories">
+                  <ListIcon />
+                  <span>Categories</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/orders">
+                  <ShoppingCart />
+                  <span>Orders</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/users">
+                  <Users />
+                  <span>Users</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/customers">
+                  <Users />
+                  <span>Customers</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/payments">
+                  <CreditCard />
+                  <span>Payments</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

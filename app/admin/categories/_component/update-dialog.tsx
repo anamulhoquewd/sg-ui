@@ -26,57 +26,36 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FormValues } from "../_hook/useCategory";
+import { ICategory } from "@/interfaces/categories";
 
-const categoryFormSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  slug: z.string().min(1, "Slug is required").optional(),
-  description: z.string().optional(),
-});
-
-type CategoryFormValues = z.infer<typeof categoryFormSchema>;
-
-interface CategoryDialogProps {
+interface Props {
+  form: any;
+  onSubmit: (data: FormValues) => void;
+  isLoading: boolean;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  category: {
-    _id: string;
-    name: string;
-    slug: string;
-    description: string;
-  } | null;
-  onUpdate: (data: CategoryFormValues) => void;
+  changeOpen: (open: boolean) => void;
+  selectedItem: ICategory;
+  setSelectedItem: (selectedItem: ICategory | null) => void;
 }
 
 export default function UpdateDialog({
+  form,
+  onSubmit,
+  isLoading,
   open,
-  onOpenChange,
-  category,
-  onUpdate,
-}: CategoryDialogProps) {
-  const [isPending, setIsPending] = useState(false);
-
-  const form = useForm<CategoryFormValues>({
-    resolver: zodResolver(categoryFormSchema),
-    defaultValues: {
-      name: category?.name || "",
-      slug: category?.slug || "",
-      description: category?.description || "",
-    },
-  });
-
-  const onSubmit = async (data: CategoryFormValues) => {
-    setIsPending(true);
-    try {
-      onUpdate(data);
-    } catch (error) {
-      console.error("Error updating category:", error);
-    } finally {
-      setIsPending(false);
-    }
-  };
-
+  changeOpen,
+  selectedItem,
+  setSelectedItem,
+}: Props) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        changeOpen(isOpen);
+        if (!isOpen) setSelectedItem(null);
+      }}
+    >
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -84,7 +63,7 @@ export default function UpdateDialog({
             Update Category
           </DialogTitle>
           <DialogDescription>
-            Change the category for {category?.name}.
+            Change the category for {selectedItem?.name}.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -94,12 +73,14 @@ export default function UpdateDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="cursor-pointer">Product Name</FormLabel>
+                  <FormLabel className="cursor-pointer">
+                    Category Name
+                  </FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="Type name" {...field} />
                   </FormControl>
                   <FormDescription>
-                    The name displayed in product listings
+                    The name displayed in categroy listings
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -132,12 +113,15 @@ export default function UpdateDialog({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={() => {
+                  changeOpen(false);
+                  setSelectedItem(null);
+                }}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Updating..." : "Update Category"}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Updating..." : "Update"}
               </Button>
             </DialogFooter>
           </form>

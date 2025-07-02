@@ -36,7 +36,6 @@ export default function ShowItems({
   order,
 }: ShowItemsProps) {
   const [items, setItems] = useState<IOrderItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setItems(order?.items || []);

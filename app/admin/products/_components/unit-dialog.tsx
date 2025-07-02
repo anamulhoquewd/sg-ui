@@ -49,42 +49,45 @@ const unitFormSchema = z.object({
   unitType: z.string(),
 });
 
-type UnitFormValues = z.infer<typeof unitFormSchema>;
+type FormValues = z.infer<typeof unitFormSchema>;
 
-interface UnitDialogProps {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: any;
-  onUpdate: (data: UnitFormValues) => void;
+  onUpdate: (data: FormValues) => void;
 }
 
-export function UnitDialog({
-  open,
-  onOpenChange,
-  product,
-  onUpdate,
-}: UnitDialogProps) {
+export function UnitDialog({ open, onOpenChange, product, onUpdate }: Props) {
   const [isPending, setIsPending] = useState(false);
 
-  const form = useForm<UnitFormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(unitFormSchema),
     defaultValues: {
-      status: product?.status || "inStock",
-      lowStockThreshold: product?.lowStockThreshold || 20,
+      status: product?.status || "",
+      lowStockThreshold: product?.lowStockThreshold || 0,
       price: product?.unit?.price || 0,
       costPerItem: product?.unit?.costPerItem || 0,
       stockQuantity: product?.unit?.stockQuantity || 0,
       averageWeightPerFruit: product?.unit?.averageWeightPerFruit || "",
-      unitType: product?.unit?.unitType || "piece",
+      unitType: product?.unit?.unitType || "",
     },
   });
 
-  const onSubmit = async (data: UnitFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     setIsPending(true);
     try {
       onUpdate(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating unit information:", error);
+
+      if (error.response.data.success === false) {
+        error.response.data.fields.forEach((field: any) => {
+          form.setError(field.name, {
+            message: field.message,
+          });
+        });
+      }
     } finally {
       setIsPending(false);
     }

@@ -43,6 +43,8 @@ import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 import { handleAxiosError } from "@/utils/error";
 import api from "@/axios/interceptor";
+import useProduct from "../_hook/useProduct";
+import useCategory from "../../categories/_hook/useCategory";
 
 interface ProductDiscunt {
   discountType: "percentage" | "flat";
@@ -84,190 +86,16 @@ export interface ProductDocument extends Document {
   category: string;
 }
 
-// Form schema
-const productFormSchema = z.object({
-  slug: z
-    .string()
-    .regex(
-      /^[a-z0-9]+(-[a-z0-9]+)*$/,
-      "Slug must be lowercase letters, numbers, and hyphens only (no spaces or special characters)."
-    ),
-  name: z
-    .string()
-    .min(5, { message: "Product name must be at least 5 characters." }),
-  title: z
-    .string()
-    .min(10, { message: "Product title must be at least 10 characters." })
-    .optional(),
-  shortDescription: z
-    .string()
-    .min(20, { message: "Short description must be at least 20 characters." })
-    .optional(),
-  longDescription: z
-    .string()
-    .min(50, { message: "Long description must be at least 50 characters." })
-    .optional(),
-  origin: z.string().optional(),
-
-  category: z
-    .string()
-    .length(24, { message: "Invalid category ID" })
-    .regex(/^[a-fA-F0-9]{24}$/, { message: "Invalid ObjectId format" }),
-  status: z.enum(["inStock", "lowStock", "outOfStock"]),
-  isPopular: z.boolean().default(false),
-  visibility: z.boolean().default(true),
-  season: z.string().optional(),
-
-  unit: z.object({
-    unitType: z.enum(["kg", "piece"]),
-    averageWeightPerFruit: z.string(),
-    price: z.coerce
-      .number()
-      .positive({ message: "Original Price must be a positive number." }),
-    costPerItem: z.coerce
-      .number()
-      .nonnegative({ message: "Cost must be a non-negative number." })
-      .optional(),
-    stockQuantity: z.coerce.number().nonnegative({
-      message: "Stock quantity must be a non-negative number.",
-    }),
-  }),
-
-  lowStockThreshold: z.coerce.number().nonnegative(),
-  averageWeightPerFruit: z.string().optional(),
-});
-
 export default function NewProductPage() {
-  const [images, setImages] = useState<{ url: string; file?: File }[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const router = useRouter();
-
-  // Categories
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  useEffect(() => {
-    // Fetch categories
-    const getCategorires = async () => {
-      try {
-        const response = await api.get("/categories", {
-          params: { limit: 1000 },
-        });
-
-        if (!response.data.success) {
-          throw new Error(
-            response.data.error.message || "Something with wrong!"
-          );
-        }
-
-        setCategories(response.data.data);
-      } catch (error) {
-        handleAxiosError(error);
-      }
-    };
-
-    getCategorires();
-  }, []);
-
-  // Initialize form with default values
-  const form = useForm({
-    resolver: zodResolver(productFormSchema),
-    defaultValues: {
-      slug: "",
-      name: "",
-      category: "",
-      isPopular: false,
-      visibility: true,
-      lowStockThreshold: 20,
-      status: "inStock",
-      unit: {
-        price: 0,
-        costPerItem: 0,
-        stockQuantity: 0,
-        averageWeightPerFruit: "",
-      },
-    },
-  });
-
-  // Handle image upload
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newImages = Array.from(e.target.files).map((file) => ({
-        url: URL.createObjectURL(file),
-        file,
-      }));
-      setImages((prev) => [...prev, ...newImages]);
-    }
-  };
-
-  // Remove image
-  const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // Form submission
-  const onSubmit = async (data: z.infer<typeof productFormSchema>) => {
-    setIsSubmitting(true);
-
-    try {
-      const formData = new FormData();
-
-      const hasImages = images.some((image) => image?.file);
-
-      if (!hasImages) {
-        toast("At least one image is required");
-        throw new Error("At least one image is required.");
-      }
-
-      // Append images
-      images.forEach((image) => {
-        if (image.file) {
-          formData.append("media", image.file);
-        }
-      });
-
-      const [productResponse, mediaResponse] = await Promise.all([
-        api.post("http://localhost:3000/api/v1/products/register", {
-          ...data,
-        }),
-        api.post(`/products/media?slug=${data.slug}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }),
-      ]);
-
-      if (!productResponse.data.success) {
-        toast(productResponse.data?.error?.message || "Something went wrong");
-        throw new Error(
-          productResponse.data?.error?.message || "Something with wrong"
-        );
-      }
-      if (!mediaResponse.data.success) {
-        toast(mediaResponse.data?.error?.message || "Something went wrong");
-        throw new Error(
-          mediaResponse.data?.error?.message || "Something with wrong"
-        );
-      }
-
-      // Submit
-
-      await api.patch(`/products/${productResponse.data.data._id}/media`, {
-        urls: mediaResponse.data.data,
-      });
-
-      toast(productResponse.data?.message || "Product has been created.");
-      toast(mediaResponse.data?.message || "Files has been uploaded in S3.");
-
-      form.reset();
-
-      router.push("/admin/products");
-    } catch (error: any) {
-      console.error("Error creating product: ", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    isLoading,
+    form,
+    handleImageUpload,
+    hadnleSubmit,
+    removeImage,
+    images,
+  } = useProduct();
+  const { categories } = useCategory();
 
   return (
     <div className="space-y-6">
@@ -287,17 +115,17 @@ export default function NewProductPage() {
           </Button>
           <Button
             className="bg-primary hover:bg-primary/90 cursor-pointer"
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={isSubmitting}
+            onClick={form.handleSubmit(hadnleSubmit)}
+            disabled={isLoading}
           >
             <Save className="mr-2 h-4 w-4" />
-            {isSubmitting ? "Saving..." : "Save Product"}
+            {isLoading ? "Saving..." : "Save Product"}
           </Button>
         </div>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(hadnleSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {/* Main product information */}
             <div className="md:col-span-2 space-y-6">
@@ -538,7 +366,7 @@ export default function NewProductPage() {
                     />
                     <FormField
                       control={form.control}
-                      name="averageWeightPerFruit"
+                      name="unit.averageWeightPerFruit"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Average Weight Per Fruit</FormLabel>
@@ -609,14 +437,14 @@ export default function NewProductPage() {
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
+                        <FormLabel>Stock</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select a unit" />
+                              <SelectValue placeholder="Select a stock status" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -727,6 +555,10 @@ export default function NewProductPage() {
                 </CardContent>
               </Card>
             </div>
+
+            <Button className="sr-only" type="submit">
+              Submit
+            </Button>
           </div>
         </form>
       </Form>

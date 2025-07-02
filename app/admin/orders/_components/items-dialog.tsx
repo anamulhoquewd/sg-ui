@@ -24,7 +24,7 @@ import {
 import { Plus, Minus, Trash2, Package } from "lucide-react";
 import { IOrderItem } from "@/interfaces/orders";
 
-export interface ItemsDialogProps {
+export interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   order: { _id: string; items: IOrderItem[]; amount: number };
@@ -36,7 +36,7 @@ export default function ItemsDialog({
   onOpenChange,
   order,
   onUpdate,
-}: ItemsDialogProps) {
+}: Props) {
   const [items, setItems] = useState<IOrderItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 

@@ -18,13 +18,13 @@ import {
   Clock,
 } from "lucide-react";
 import api from "@/axios/interceptor";
-import { Product } from "@/components/product-page";
 import { Input } from "@/components/ui/input";
+import { IProduct } from "@/interfaces/products";
 
 export default function ProductPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<IProduct | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
 
   const fetchProduct = async () => {
@@ -81,8 +81,11 @@ export default function ProductPage() {
             <div className="space-y-4">
               <div className="relative aspect-square overflow-hidden rounded-lg border">
                 <Image
-                  src={product?.media[selectedImage].url || "/placeholder.svg"}
-                  alt={product?.media[selectedImage].alt || "Product Image"}
+                  src={
+                    product?.media[selectedImage]?.url ||
+                    "https://placehold.co/500x600"
+                  }
+                  alt={product?.media[selectedImage]?.alt || "Product Image"}
                   fill
                   className="object-cover"
                   priority

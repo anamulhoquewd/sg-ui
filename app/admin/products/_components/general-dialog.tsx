@@ -34,13 +34,13 @@ const generalFormSchema = z.object({
   longDescription: z.string().optional(),
 });
 
-type GeneralFormValues = z.infer<typeof generalFormSchema>;
+type FormValues = z.infer<typeof generalFormSchema>;
 
-interface GeneralDialogProps {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: any;
-  onUpdate: (data: GeneralFormValues) => void;
+  onUpdate: (data: FormValues) => void;
 }
 
 export function GeneralDialog({
@@ -48,10 +48,10 @@ export function GeneralDialog({
   onOpenChange,
   product,
   onUpdate,
-}: GeneralDialogProps) {
+}: Props) {
   const [isPending, setIsPending] = useState(false);
 
-  const form = useForm<GeneralFormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(generalFormSchema),
     defaultValues: {
       name: product?.name || "",
@@ -61,12 +61,27 @@ export function GeneralDialog({
     },
   });
 
-  const onSubmit = async (data: GeneralFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     setIsPending(true);
     try {
       onUpdate(data);
-    } catch (error) {
+
+      form.reset({
+        name: "",
+        title: "",
+        shortDescription: "",
+        longDescription: "",
+      });
+    } catch (error: any) {
       console.error("Error updating general information:", error);
+
+      if (error.response.data.success === false) {
+        error.response.data.fields.forEach((field: any) => {
+          form.setError(field.name, {
+            message: field.message,
+          });
+        });
+      }
     } finally {
       setIsPending(false);
     }
