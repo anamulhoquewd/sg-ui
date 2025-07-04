@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import EasyPeasyProvider from "@/store/provider/provider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,7 +16,7 @@ export default function RootLayout({
   return (
     <>
       <Header />
-      {children}
+      <EasyPeasyProvider>{children}</EasyPeasyProvider>
       <Footer />
     </>
   );

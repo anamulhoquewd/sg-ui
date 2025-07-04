@@ -102,10 +102,10 @@ export default function StatusDialog({
   order,
   onUpdate,
 }: StatusDialogProps) {
-  const [status, setStatus] = useState("");
-  const [paymentStatus, setPaymentStatus] = useState("");
-  const [notes, setNotes] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<string>("");
+  const [paymentStatus, setPaymentStatus] = useState<string>("");
+  const [notes, setNotes] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -22,12 +22,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Minus, DollarSign } from "lucide-react";
+import { IOrder } from "@/interfaces/orders";
 
 interface AdjustmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  order: any;
-  onUpdate: (data: any) => void;
+  order: IOrder;
+  onUpdate: (data: { amount: number; type: "addition" | "discount" }) => void;
 }
 
 export default function AdjustmentDialog({
@@ -53,18 +54,18 @@ export default function AdjustmentDialog({
         throw new Error("Please enter a valid amount");
       }
 
-      // const newAmount =
-      //   adjustmentType === "discount" || adjustmentType === "refund"
-      //     ? order.amount - adjustmentAmount
-      //     : order.amount + adjustmentAmount;
+      console.log({
+        type: adjustmentType,
+        amount: adjustmentAmount,
+        notes,
+      });
 
       onUpdate({
-        adjustment: {
-          type: adjustmentType,
-          amount: adjustmentAmount,
-          notes,
-        },
-        amount: calculateNewTotal(),
+        type:
+          adjustmentType === "discount" || adjustmentType === "refund"
+            ? "discount"
+            : "addition",
+        amount: adjustmentAmount,
       });
 
       onOpenChange(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -51,8 +51,8 @@ export function VisibilityDialog({
   const form = useForm<FormValues>({
     resolver: zodResolver(visibilityFormSchema),
     defaultValues: {
-      visibility: product?.visibility || false,
-      isPopular: product?.isPopular || false,
+      visibility: false,
+      isPopular: false,
     },
   });
 
@@ -74,6 +74,15 @@ export function VisibilityDialog({
       setIsPending(false);
     }
   };
+
+  useEffect(() => {
+    if (product) {
+      form.reset({
+        visibility: product?.visibility || false,
+        isPopular: product?.isPopular || false,
+      });
+    }
+  }, [product]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

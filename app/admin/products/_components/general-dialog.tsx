@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -51,16 +51,6 @@ export function GeneralDialog({
 }: Props) {
   const [isPending, setIsPending] = useState(false);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(generalFormSchema),
-    defaultValues: {
-      name: product?.name || "",
-      title: product?.title || "",
-      shortDescription: product?.shortDescription || "",
-      longDescription: product?.longDescription || "",
-    },
-  });
-
   const onSubmit = async (data: FormValues) => {
     setIsPending(true);
     try {
@@ -86,6 +76,27 @@ export function GeneralDialog({
       setIsPending(false);
     }
   };
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(generalFormSchema),
+    defaultValues: {
+      name: "",
+      title: "",
+      shortDescription: "",
+      longDescription: "",
+    },
+  });
+
+  useEffect(() => {
+    if (product) {
+      form.reset({
+        name: product.name || "",
+        title: product.title || "",
+        shortDescription: product.shortDescription || "",
+        longDescription: product.longDescription || "",
+      });
+    }
+  }, [product]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

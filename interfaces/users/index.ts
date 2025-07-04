@@ -5,6 +5,7 @@ export interface IAdmin {
   phone: string;
   address: string;
   role: "super_admin" | "admin";
+  avatar?: string;
 }
 
 export interface ICustomer {

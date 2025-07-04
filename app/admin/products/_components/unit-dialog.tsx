@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -64,13 +64,13 @@ export function UnitDialog({ open, onOpenChange, product, onUpdate }: Props) {
   const form = useForm<FormValues>({
     resolver: zodResolver(unitFormSchema),
     defaultValues: {
-      status: product?.status || "",
-      lowStockThreshold: product?.lowStockThreshold || 0,
-      price: product?.unit?.price || 0,
-      costPerItem: product?.unit?.costPerItem || 0,
-      stockQuantity: product?.unit?.stockQuantity || 0,
-      averageWeightPerFruit: product?.unit?.averageWeightPerFruit || "",
-      unitType: product?.unit?.unitType || "",
+      status: "",
+      lowStockThreshold: 0,
+      price: 0,
+      costPerItem: 0,
+      stockQuantity: 0,
+      averageWeightPerFruit: "",
+      unitType: "",
     },
   });
 
@@ -92,6 +92,20 @@ export function UnitDialog({ open, onOpenChange, product, onUpdate }: Props) {
       setIsPending(false);
     }
   };
+
+  useEffect(() => {
+    if (product) {
+      form.reset({
+        status: product?.status || "",
+        lowStockThreshold: product?.lowStockThreshold || 0,
+        price: product?.unit?.price || 0,
+        costPerItem: product?.unit?.costPerItem || 0,
+        stockQuantity: product?.unit?.stockQuantity || 0,
+        averageWeightPerFruit: product?.unit?.averageWeightPerFruit || "",
+        unitType: product?.unit?.unitType || "",
+      });
+    }
+  }, [product]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -26,6 +26,8 @@ function useCategory() {
   const [categories, setCategories] = useState<ICategory[] | []>([]);
   const [pagination, setPagination] = useState<IPagination>(defaultPagination);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isAvatarOpen, setIsAvatarOpen] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(categoryFormSchema),
@@ -156,6 +158,51 @@ function useCategory() {
     }
   };
 
+  const uploadHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.warn("Called handler");
+    const files = event.target.files;
+    if (!files || !files[0]) {
+      return;
+    }
+
+    const file = files[0];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+
+    if (file.size > maxSize) {
+      setError("File size is too large. Maximum size is 2MB.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    try {
+      const response = await api.post(
+        `/categories/uploads?filename=${
+          selectedItem ? selectedItem.name.split(" ").join("-") : "category"
+        }&categoryId=${selectedItem?._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (!response.data.success) {
+        throw new Error(response.data.error.message);
+      }
+
+      toast(response.data.message || "Avatar change successfully!");
+
+      setIsAvatarOpen(false);
+
+      loadCategories({ page: pagination.page, searchQuery });
+    } catch (error: any) {
+      console.log("Error: ", error);
+    }
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchQuery(search);
@@ -202,6 +249,11 @@ function useCategory() {
     pagination,
     setPagination,
     categories,
+    error,
+    setError,
+    isAvatarOpen,
+    setIsAvatarOpen,
+    uploadHandler,
   };
 }
 

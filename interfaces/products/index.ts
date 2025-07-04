@@ -2,6 +2,7 @@ export interface IProduct {
   _id: string;
   name: string;
   slug: string;
+  title: string;
   shortDescription?: string;
   longDescription?: string;
   status: "inStock" | "outOfStock" | "lowStock";
@@ -12,6 +13,7 @@ export interface IProduct {
     averageWeightPerFruit?: string;
     unitType: "kg" | "piece";
     stockQuantity: number;
+    costPerItem: number;
   };
   category: {
     name: string;
@@ -29,4 +31,17 @@ export interface IProduct {
 export interface IMedia {
   alt: string;
   url: string;
+}
+
+export interface ICartItem {
+  _id: string;
+  name: string;
+  media: { url: string; alt: string };
+  title: string;
+  unit: {
+    price: number;
+    stockQuantity: number;
+    unitType: "kg" | "piece";
+  };
+  quantity: number;
 }

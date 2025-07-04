@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -58,7 +58,7 @@ export function CategoryDialog({
   const form = useForm<FormValues>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
-      category: product?.category._id || "",
+      category: "",
     },
   });
 
@@ -82,6 +82,14 @@ export function CategoryDialog({
       setIsPending(false);
     }
   };
+
+  useEffect(() => {
+    if (product) {
+      form.reset({
+        category: product?.category._id || "",
+      });
+    }
+  }, [product]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

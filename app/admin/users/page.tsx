@@ -30,7 +30,7 @@ import {
 import Paginations from "@/components/pagination";
 import { DeleteDialog } from "../_components/delete-dialong";
 import { IAdmin } from "@/interfaces/users";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import useAdmin from "./_hook/useAdmin";
 
 export default function UsersPage() {
@@ -113,8 +113,9 @@ export default function UsersPage() {
                   admins.map((admin: IAdmin) => (
                     <TableRow key={admin._id}>
                       <TableCell>
-                        <div className="relative h-10 w-10 overflow-hidden rounded-md">
-                          <Avatar>
+                        <div className="relative h-10 w-10 ring rounded-4xl overflow-hidden">
+                          <Avatar className="w-full h-full">
+                            <AvatarImage src={admin.avatar} alt={admin.name} />
                             <AvatarFallback className="uppercase">
                               {admin.name.charAt(0)}
                             </AvatarFallback>

@@ -79,11 +79,7 @@ export function HeroSection() {
                 Fresh Mangoes at Your Doorstep
               </div>
               <Link href="/products">
-                {" "}
-                <Button
-                  size="lg"
-                  className="cursor-pointer"
-                >
+                <Button size="lg" className="cursor-pointer">
                   Shop Now
                 </Button>
               </Link>

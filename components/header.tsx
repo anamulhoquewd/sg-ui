@@ -28,41 +28,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./ui/collapsible";
-
-const caterise: {
-  title: string;
-  href: string;
-  description: string;
-  image: string;
-}[] = [
-  {
-    title: "Mangos",
-    href: "/products?category=mangos",
-    image: "",
-    description:
-      "Mangos are a type of fruit that are popular in many parts of the world.",
-  },
-  {
-    title: "Pomegranate",
-    href: "/products?category=pomegranate",
-    image: "",
-    description:
-      "Pomegranates are a type of fruit that are popular in many parts of the world.",
-  },
-  {
-    title: "Pineapple",
-    href: "/products?category=pineapple",
-    image: "",
-    description:
-      "Pineapples are a type of fruit that are popular in many parts of the world.",
-  },
-];
+import useCategory from "@/app/admin/categories/_hook/useCategory";
 
 export function Header() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isOpen, setIsOpen] = React.useState(false);
+
+  const { categories } = useCategory();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -144,11 +118,11 @@ export function Header() {
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                  {caterise.map((component) => (
+                  {categories.map((component) => (
                     <ListItem
-                      key={component.title}
-                      title={component.title}
-                      href={component.href}
+                      key={component.name}
+                      title={component.name}
+                      href={`/products?category=${component.slug}`}
                     >
                       {component.description}
                     </ListItem>
@@ -201,12 +175,12 @@ export function Header() {
                   </div>
 
                   <CollapsibleContent className="mt-2 ml-4 flex flex-col gap-2 text-lg">
-                    {caterise.map((component) => (
+                    {categories.map((component) => (
                       <Link
                         className="font-medium hover:text-primary transition-colors"
-                        href={component.href}
+                        href={`/products?category=${component.slug}`}
                       >
-                        {component.title}
+                        {component.name}
                       </Link>
                     ))}
                   </CollapsibleContent>

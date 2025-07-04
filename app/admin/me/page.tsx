@@ -19,24 +19,27 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2 } from "lucide-react";
+import { Camera, Loader2 } from "lucide-react";
 import { UploadAvatar } from "@/components/upload-avatar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ChangePassword from "@/components/change-password";
+import useAvatar from "@/hooks/auth/useAvatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 function Me() {
   const {
     form,
     handleUpdate,
     isLoading,
-    setIsLoading,
     passwordOpen,
     setpasswordOpen,
     isEditing,
     setIsEditing,
     user,
   } = useMe();
+  const { uploadHandler, error, setError, isAvatarOpen, setIsAvatarOpen } =
+    useAvatar();
 
   return (
     <div className="">
@@ -51,7 +54,45 @@ function Me() {
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center gap-4">
                   {/* Avatar section */}
-                  <UploadAvatar />
+                  <div className="relative">
+                    <Avatar className="h-24 w-24">
+                      <AvatarImage
+                        className="w-auto h-full object-cover"
+                        src={user ? user.avatar : ""}
+                        alt="Profile picture"
+                      />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold select-none">
+                        {user
+                          ? user.name
+                              .split(" ")
+                              .map((ch) => ch[0])
+                              .join("")
+                              .toUpperCase()
+                          : "SG"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsAvatarOpen(true)}
+                      className="absolute bottom-0 right-0 h-8 w-8 rounded-full cursor-pointer dark:bg-foreground-dark dark:hover:bg-foreground-dark/80"
+                    >
+                      <Camera className="h-4 w-4" />
+                    </Button>
+
+                    <UploadAvatar
+                      collection={{
+                        name: user?.name ?? "John Doe",
+                        avatar: user?.avatar ?? "",
+                      }}
+                      error={error}
+                      setError={setError}
+                      uploadHandler={uploadHandler}
+                      isAvatarOpen={isAvatarOpen}
+                      setIsAvatarOpen={setIsAvatarOpen}
+                    />
+                  </div>
+
                   <div className="flex flex-col items-center gap-1">
                     <h2 className="text-xl font-bold">
                       {user?.name || "John Doe"}

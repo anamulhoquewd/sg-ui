@@ -8,6 +8,8 @@ import {
   Trash2,
   Eye,
   ListIcon as Category,
+  Edit,
+  ImageIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +44,8 @@ import NewCategory from "./_component/new-category-dialog";
 import { DeleteDialog } from "../_components/delete-dialong";
 import { toast } from "sonner";
 import useCategory from "./_hook/useCategory";
+import { UploadAvatar } from "@/components/upload-avatar";
+import Image from "next/image";
 
 export default function Categories() {
   const {
@@ -63,6 +67,11 @@ export default function Categories() {
     handleUpdate,
     form,
     isLoading,
+    error,
+    setError,
+    uploadHandler,
+    isAvatarOpen,
+    setIsAvatarOpen,
   } = useCategory();
 
   return (
@@ -108,6 +117,7 @@ export default function Categories() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Slug</TableHead>
                   <TableHead>Description</TableHead>
@@ -127,52 +137,80 @@ export default function Categories() {
                 ) : (
                   categories.map((category) => (
                     <TableRow key={category._id}>
+                      <TableCell>
+                        <div className="relative h-10 w-10 overflow-hidden rounded-md">
+                          <Image
+                            src={
+                              category?.avatar ||
+                              "https://placehold.jp/250x250.png?text=Media"
+                            }
+                            alt={category?.avatar || category?.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      </TableCell>
                       <TableCell>{category?.name}</TableCell>
                       <TableCell>{category?.slug}</TableCell>
                       <TableCell>
                         {category?.description || "No description available"}
                       </TableCell>
+
                       <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <MoreHorizontal className="h-3.5 w-3.5" />
-                              <span className="sr-only">More Actions</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedItem(category);
-                                setUpdateDialogOpen(true);
-                              }}
-                            >
-                              <Category className="mr-2 h-4 w-4" />
-                              Update Category
-                            </DropdownMenuItem>
+                        <div className="flex items-center gap-4">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 cursor-pointer"
+                            onClick={() => {
+                              setIsAvatarOpen(true);
+                              setSelectedItem(category);
+                            }}
+                          >
+                            <ImageIcon className="h-3.5 w-3.5" />
+                            <span className="sr-only">Edit General</span>
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 cursor-pointer"
+                              >
+                                <MoreHorizontal className="h-3.5 w-3.5" />
+                                <span className="sr-only">More Actions</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedItem(category);
+                                  setUpdateDialogOpen(true);
+                                }}
+                              >
+                                <Category className="mr-2 h-4 w-4" />
+                                Update Category
+                              </DropdownMenuItem>
 
-                            <DropdownMenuSeparator />
+                              <DropdownMenuSeparator />
 
-                            <DropdownMenuItem>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Category
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedItem(category);
-                                setDeleteDialogOpen(true);
-                              }}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Category
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              <DropdownMenuItem>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Category
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedItem(category);
+                                  setDeleteDialogOpen(true);
+                                }}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Category
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -197,6 +235,18 @@ export default function Categories() {
         onSubmit={handleSubmit}
         form={form}
         isLoading={isLoading}
+      />
+
+      <UploadAvatar
+        collection={{
+          name: selectedItem?.name ?? "John Doe",
+          avatar: selectedItem?.avatar ?? "",
+        }}
+        error={error}
+        setError={setError}
+        uploadHandler={uploadHandler}
+        isAvatarOpen={isAvatarOpen}
+        setIsAvatarOpen={setIsAvatarOpen}
       />
 
       {/* Dialogs for updating different parts of the category */}
